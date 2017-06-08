@@ -16,6 +16,7 @@ from .ons_database import ONSDatabase
 from .ons_cloudfoundry import ONSCloudFoundry
 from .ons_logger import ONSLogger
 from .ons_jwt import ONSJwt
+from .ons_swagger import ONSSwagger
 
 
 class ONSEnvironment(object):
@@ -32,10 +33,11 @@ class ONSEnvironment(object):
         self._config = ConfigParser()
         self._config._interpolation = ExtendedInterpolation()
         self._env = getenv('ONS_ENV', 'dev')
-        self._cf = ONSCloudFoundry()
+        self._lg = ONSLogger(self)
+        self._cf = ONSCloudFoundry(self)
         self._db = ONSDatabase()
-        self._lg = ONSLogger()
         self._jw = ONSJwt(self)
+        self._sw = ONSSwagger(self)
 
     def activate(self):
         """
@@ -77,3 +79,7 @@ class ONSEnvironment(object):
     @property
     def jwt(self):
         return self._jw
+
+    @property
+    def environment(self):
+        return self._env

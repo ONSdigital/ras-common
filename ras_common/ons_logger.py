@@ -19,11 +19,12 @@ class ONSLogger(object):
     """
     Generic logging module mock in advance of the real module ...
     """
-    def __init__(self):
+    def __init__(self, env):
+        self._env = env
         log.startLogging(stdout)
 
     def activate(self):
-        self.info('Logger activated')
+        self.info('Logger activated [environment={}'.format(self._env.environment))
 
     def info(self, text):
         log.msg(text, logLevel=logging.INFO)

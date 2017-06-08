@@ -19,7 +19,6 @@
 #   o JWT token encoding / decoding
 #   o Generic cryptography (encryption / decryption)
 #
-#
 ##############################################################################
 from .ons_environment import ONSEnvironment
 

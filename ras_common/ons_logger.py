@@ -24,20 +24,25 @@ class ONSLogger(object):
         log.startLogging(stdout)
 
     def activate(self):
-        self.info('Logger activated [environment={}'.format(self._env.environment))
+        self.info('Logger activated [environment={}]'.format(self._env.environment))
 
-    def info(self, text):
+    @staticmethod
+    def info(text):
         log.msg(text, logLevel=logging.INFO)
 
-    def debug(self, text):
+    @staticmethod
+    def debug(text):
         log.msg(text, logLevel=logging.DEBUG)
 
-    def warn(self, text):
+    @staticmethod
+    def warn(text):
         log.msg(text, logLevel=logging.WARN)
 
-    def error(self, text):
+    @staticmethod
+    def error(text):
         log.msg(text, logLevel=logging.ERROR)
 
-    def critical(self, text):
+    @staticmethod
+    def critical(text):
         log.msg(text, logLevel=logging.CRITICAL)
 

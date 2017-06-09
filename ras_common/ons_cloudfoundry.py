@@ -19,7 +19,10 @@ class ONSCloudFoundry(object):
     """
     def __init__(self, env):
         self._env = env
-        self.info('Logger activated [environment={}'.format(self._env.environment))
+        self._host = None
+        self._port = 0
+        self._cf_detected = False
+        self._env.logger.info('Logger activated [environment={}'.format(self._env.environment))
 
     def activate(self):
         """
@@ -28,7 +31,61 @@ class ONSCloudFoundry(object):
         """
         vcap_application = getenv('VCAP_APPLICATION')
         if not vcap_application:
-            self.info('Platform: LOCAL (no CF detected')
-            return
+            return self._env.logger.info('Platform: LOCAL (no CF detected)')
         self.info('Platform: CLOUD FOUNDRY')
+        self._cf_detected = True
+        #
+        #   Get our host and port
+        #
         vcap_application = loads(vcap_application)
+        url = vcap_application.get('application_uris', [''])[0]
+        self._host = url.split(':')[0]
+        self._port = int(url.split(':')) if ':' in url else 0
+        #
+        #   Now get our database connection (if there is one)
+        #
+        vcap_services = getenv('VCAP_SERVICES')
+        if not vcap_services:
+            return self._env.logger.info('Services: No services detected')
+        for service in loads(vcap_services).values():
+            credentials = space['credentials']
+            self._env.set('db_connection', credentials['uri'])
+            self._env.set('db_connection_name', service['name'])
+
+        self._env.logger.info('DB Connection String: ', credentials['uri'])
+        self._env.logger.info('DB Connection Name..: ', service['name'])
+
+    @property
+    def detected(self):
+        return self._cf_detected
+
+
+
+"""
+    "VCAP_SERVICES": {
+        "rds": [
+            {
+                "credentials": {
+                    "db_name": "db9nh2xczpqu91sh1",
+                    "host": "mvp-applicationdb.cef6vnd8djsq.eu-central-1.rds.amazonaws.com",
+                    "password": "u23hxhq228uv4xn5lro6og5fk",
+                    "uri": "postgres://ugysr9v3llul8e8i:u23hxhq228uv4xn5lro6og5fk@mvp-applicationdb.cef6vnd8djsq.eu-central-1.rds.amazonaws.com:5432/db9nh2xczpqu91sh1",
+                    "username": "ugysr9v3llul8e8i"
+                },
+                "label": "rds",
+                "name": "ras-postgres",
+                "plan": "shared-psql",
+                "provider": null,
+                "syslog_drain_url": null,
+                "tags": [
+                    "database",
+                    "RDS",
+                    "postgresql"
+                ],
+                "volume_mounts": []
+            }
+        ]
+    }
+    }
+"""
+

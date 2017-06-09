@@ -12,11 +12,18 @@
 ##############################################################################
 from configparser import ConfigParser, ExtendedInterpolation
 from os import getenv
+from connexion import App
+from flask import Flask
+from flask_cors import CORS
+from flask_twisted import Twisted
 from .ons_database import ONSDatabase
 from .ons_cloudfoundry import ONSCloudFoundry
 from .ons_logger import ONSLogger
 from .ons_jwt import ONSJwt
 from .ons_swagger import ONSSwagger
+from .ons_cryptographer import ONSCryptographer
+from .ons_registration import ONSRegistration
+from socket import socket, AF_INET, SOCK_STREAM
 
 
 class ONSEnvironment(object):
@@ -30,28 +37,44 @@ class ONSEnvironment(object):
         """
         self._jwt_algorithm = None
         self._jwt_secret = None
+        self._port = None
+        self._host = None
         self._config = ConfigParser()
         self._config._interpolation = ExtendedInterpolation()
         self._env = getenv('ONS_ENV', 'dev')
         self._lg = ONSLogger(self)
         self._cf = ONSCloudFoundry(self)
-        self._db = ONSDatabase()
-        self._jw = ONSJwt(self)
         self._sw = ONSSwagger(self)
+        self._db = ONSDatabase(self)
+        self._jw = ONSJwt(self)
+        self._cr = ONSCryptographer(self)
+        self._registration = ONSRegistration(self)
 
     def activate(self):
         """
         Start the ball rolling ...
         """
         self.setup_ini()
+        self._lg.activate()
         self._cf.activate()
         self._db.activate()
-        self._lg.activate()
+        self._sw.activate()
+        self._registration.activate()
+
+        if self.swagger.has_api:
+            app = App(__name__, specification_dir=self.swagger.path)
+            app.add_api(self.swagger.file, arguments={'title': self.ms_name})
+            CORS(app.app)
+        else:
+            app = Flask(__name__)
+            CORS(app)
+        Twisted(app).run(host='0.0.0.0', port=self.port)
 
     def setup_ini(self):
         self._config.read(['local.ini', 'config.ini', '../config.ini'])
         self._jwt_algorithm = self.get('jwt_algorithm')
         self._jwt_secret = self.get('jwt_secret')
+        self._port = getenv('PORT', self.get('port', self.get_free_port()))
 
     def get(self, attribute, default=None, section=None):
         """
@@ -68,6 +91,51 @@ class ONSEnvironment(object):
             return self._config[section].get(attribute, default)
         return default
 
+    def set(self, attribute, value):
+        """
+        Store a variable back into the memory copy of our .INI file
+
+        :param attribute: The key to write to
+        :param value: The value to write
+        """
+        self._config[self._env][attribute] = value
+
+    def get_free_port(self):
+        sock = socket(AF_INET, SOCK_STREAM)
+        sock.bind(('localhost', 0))
+        _, port = sock.getsockname()
+        sock.close()
+        self.logger.info('Acquired listening port "{}"'.format(port))
+        return port
+
+    @property
+    def drop_database(self):
+        return self.get('drop_database', 'false').lower() in ['yes', 'true']
+
+    @property
+    def port(self):
+        return self._port
+
+    @property
+    def host(self):
+        return self._host if self._host else 'localhost'
+
+    @property
+    def logger(self):
+        return self._lg
+
+    @property
+    def cf(self):
+        return self._cf
+
+    @property
+    def crypt(self):
+        return self._cr
+
+    @property
+    def swagger(self):
+        return self._sw
+
     @property
     def jwt_algorithm(self):
         return self._jwt_algorithm
@@ -83,3 +151,7 @@ class ONSEnvironment(object):
     @property
     def environment(self):
         return self._env
+
+    @property
+    def ms_name(self):
+        return "ONS Micro-Service"

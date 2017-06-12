@@ -41,13 +41,13 @@ class ONSEnvironment(object):
         self._host = None
         self._config = ConfigParser()
         self._config._interpolation = ExtendedInterpolation()
-        self._env = getenv('ONS_ENV', 'dev')
-        self._lg = ONSLogger(self)
-        self._cf = ONSCloudFoundry(self)
-        self._sw = ONSSwagger(self)
-        self._db = ONSDatabase(self)
-        self._jw = ONSJwt(self)
-        self._cr = ONSCryptographer(self)
+        self._env = getenv('ONS_ENV', 'development')
+        self._logger = ONSLogger(self)
+        self._database = ONSDatabase(self)
+        self._cloudfoundry = ONSCloudFoundry(self)
+        self._swagger = ONSSwagger(self)
+        self._jwt = ONSJwt(self)
+        self._cryptography = ONSCryptographer(self)
         self._registration = ONSRegistration(self)
 
     def activate(self):
@@ -55,10 +55,12 @@ class ONSEnvironment(object):
         Start the ball rolling ...
         """
         self.setup_ini()
-        self._lg.activate()
-        self._cf.activate()
-        self._db.activate()
-        self._sw.activate()
+        self._logger.activate()
+        self._cloudfoundry.activate()
+        self._database.activate()
+        self._swagger.activate()
+        self._jwt.activate()
+        self._cryptography.activate()
         self._registration.activate()
 
         if self.swagger.has_api:
@@ -122,19 +124,19 @@ class ONSEnvironment(object):
 
     @property
     def logger(self):
-        return self._lg
+        return self._logger
 
     @property
     def cf(self):
-        return self._cf
+        return self._cloudfoundry
 
     @property
     def crypt(self):
-        return self._cr
+        return self._cryptography
 
     @property
     def swagger(self):
-        return self._sw
+        return self._swagger
 
     @property
     def jwt_algorithm(self):
@@ -146,7 +148,7 @@ class ONSEnvironment(object):
 
     @property
     def jwt(self):
-        return self._jw
+        return self._jwt
 
     @property
     def environment(self):

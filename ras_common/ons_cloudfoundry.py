@@ -22,7 +22,6 @@ class ONSCloudFoundry(object):
         self._host = None
         self._port = 0
         self._cf_detected = False
-        self._env.logger.info('Logger activated [environment={}'.format(self._env.environment))
 
     def activate(self):
         """

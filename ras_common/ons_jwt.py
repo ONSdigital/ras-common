@@ -15,6 +15,13 @@ class ONSJwt(object):
 
     def __init__(self, env):
         self._env = env
+        self._algorithm = None
+        self._secret = None
+
+    def activate(self):
+        """
+        Read in defaults from the config.ini
+        """
         self._algorithm = self._env.jwt_algorithm
         self._secret = self._env.jwt_secret
 

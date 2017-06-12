@@ -23,6 +23,12 @@ class ONSCryptographer:
         :param key: The encryption key to use when encrypting the data
         """
         self._env = env
+        self._key = None
+
+    def activate(self):
+        """
+        Setup the required keys with values from config.ini
+        """
         key = getenv('ONS_CRYPTOKEY', self._env.get('crypto_key', 'NO_KEY'))
         self._env.logger.debug('Setting crypto key to "{}"'.format(key))
         self._key = sha256(key.encode('utf-8')).digest()

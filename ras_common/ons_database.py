@@ -13,6 +13,7 @@
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
+from pathlib import Path
 
 
 class ONSDatabase(object):
@@ -26,8 +27,8 @@ class ONSDatabase(object):
         self._session = scoped_session(sessionmaker())
 
     def activate(self):
-        if self._env.get('database_enabled', 'false').lower() not in ['true', 'yes']:
-            return self._env.logger.info('Database is NOT enabled [missing "database_enabled = true"]')
+        if self._env.get('enable_database', 'false').lower() not in ['true', 'yes']:
+            return self._env.logger.info('Database is NOT enabled [missing "enabled_database = true"]')
 
         db_connection = self._env.get('db_connection')
         self._env.logger.info('Database connection is "{}"'.format(db_connection))
@@ -37,8 +38,22 @@ class ONSDatabase(object):
             self.drop()
         self.create()
 
+    def check_paths(self):
+        """
+        Check our filesystem for required database files ...
+        :return: True if database environment is available
+        """
+        if not Path('swagger_server').is_dir():
+            return self._env.logger.warn('[swagger_server] folder is missing')
+        if not Path('swagger_server/models_local').is_dir():
+            return self._env.logger.warn('[swagger_server/models_local] folder is missing')
+        if not Path('swagger_server/models_local/_models.py').is_file():
+            return self._env.logger.warn('[swagger_server/models_local/_models.py] file is missing')
+
     def drop(self):
         self._env.logger.info('Dropping database tables')
+        if not self.check_paths():
+            return
         from swagger_server.models_local import _models
         connection = self._env.get('db_connection')
         schema = self._env.get('db_schema')
@@ -61,6 +76,6 @@ class ONSDatabase(object):
         self._env.logger.info('Creating database with uri "{}"'.format(connection))
         if connection.startswith('postgres'):
             self._env.logger.info("Creating schema {}.".format(schema))
-            engine.execute("CREATE SCHEMA IF NOT EXISTS {}".format(schema))
+            self._engine.execute("CREATE SCHEMA IF NOT EXISTS {}".format(schema))
         self._env.logger.info("Creating database tables.")
         self._base.metadata.create_all(self._engine)

@@ -113,8 +113,6 @@ class ONSRegistration(object):
                 return
             self.register_routes()
         except requests.exceptions.ConnectionError as e:
-            self.log('ping failed: "{}"'.format(e.args[0].reason))
-            self.log("Proto>", self._proto)
-            self.log("GW>", self._gateway)
-            self.log("Endpoint>", api_ping)
+            self.log('ping failed for "{}"'.format(api_ping))
+            self.log('ping return = "{}"'.format(e.args[0].reason))
             self._state = False

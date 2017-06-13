@@ -1,1 +1,1 @@
-web: ONS_ENV=production python3 main.py
+web: ONS_ENV=dev python3 main.py

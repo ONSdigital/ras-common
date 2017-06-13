@@ -54,8 +54,8 @@ class ONSCloudFoundry(object):
             self._env.set('db_connection', credentials['uri'])
             self._env.set('db_connection_name', service['name'])
 
-        self.log('DB Connection String: ', credentials['uri'])
-        self.log('DB Connection Name..: ', service['name'])
+        self.info('DB Connection String: ', credentials['uri'])
+        self.info('DB Connection Name..: ', service['name'])
 
     @property
     def detected(self):

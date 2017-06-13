@@ -114,4 +114,5 @@ class ONSRegistration(object):
             self.register_routes()
         except requests.exceptions.ConnectionError as e:
             self.log('ping failed: "{}"'.format(e.args[0].reason))
+            self.log("Endpoint>", api_ping)
             self._state = False

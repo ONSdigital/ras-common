@@ -1,0 +1,8 @@
+include *.py 
+recursive-includes ons_ras_common *.py
+config.ini
+local.ini
+swagger.yaml
+skeleton.py
+runtime.txt
+Procfile

@@ -22,6 +22,16 @@ class ONSSwagger(object):
         self._env = env
         self._changed = False
         self._spec = {}
+        self._swagger = {}
+        self._has_api = False
+
+    def info(self, text):
+        self._env.logger.info('[swagger] {}'.format(text))
+
+    def activate(self):
+        """
+        Obligatory changes to the swagger specification based on the deployment environment
+        """
         self._swagger = self._env.get('swagger', 'swagger_server/swagger/swagger.yaml')
         self._has_api = Path(self._swagger).is_file()
         self.info('Swagger API {} detected'.format('has been' if self._has_api else 'NOT'))
@@ -31,13 +41,6 @@ class ONSSwagger(object):
         with open(self._swagger) as io:
             self._spec = load(io.read())
 
-    def info(self, text):
-        self._env.logger.info('[swagger] {}'.format(text))
-
-    def activate(self):
-        """
-        Obligatory changes to the swagger specification based on the deployment environment
-        """
         self.rewrite_host(self._env.get('api_gateway', 'localhost'))
 
     def rewrite_host(self, host):
@@ -64,7 +67,10 @@ class ONSSwagger(object):
 
     @property
     def path(self):
-        parts = self._env.get('swagger', self._swagger).split('/')
+        swagger = self._env.get('swagger', self._swagger)
+        if '/' not in swagger:
+            return './'
+        parts = swagger.split('/')
         return '/'.join(parts[:-1])
 
     @property

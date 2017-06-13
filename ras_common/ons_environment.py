@@ -71,7 +71,8 @@ class ONSEnvironment(object):
             if not Path(swagger_file).is_file():
                 self.info('Unable to access swagger file "{}"'.format(swagger_file))
                 return
-            app = App(__name__, specification_dir=self.swagger.path)
+
+            app = App(__name__, specification_dir='../{}'.format(self.swagger.path))
             app.add_api(self.swagger.file, arguments={'title': self.ms_name})
             CORS(app.app)
         else:
@@ -96,6 +97,9 @@ class ONSEnvironment(object):
         """
         if not section:
             section = self._env
+        value = self._config['microservice'].get(attribute, None)
+        if value:
+            return value
         if section in self._config:
             return self._config[section].get(attribute, default)
         return default

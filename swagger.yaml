@@ -1,0 +1,21 @@
+swagger: "2.0"
+info:
+  version: "1.0.0"
+  title: API Skeleton
+host: localhost:8080
+basePath: /skeleton/1.0.0
+definitions: {}
+schemes:
+  - http
+  - https
+consumes: [application/json]
+produces: [application/json]
+
+paths:
+  /hello_world:
+    get:
+      operationId: hello_world
+      responses:
+        200: {description: status supplied}
+        500: {description: server error}
+      x-swagger-router-controller: skeleton.skeleton

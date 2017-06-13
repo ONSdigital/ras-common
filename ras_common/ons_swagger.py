@@ -22,14 +22,17 @@ class ONSSwagger(object):
         self._env = env
         self._changed = False
         self._spec = {}
-        self._swagger = self._env.get('swagger', '../swagger_server/swagger/swagger.yaml')
+        self._swagger = self._env.get('swagger', 'swagger_server/swagger/swagger.yaml')
         self._has_api = Path(self._swagger).is_file()
-        self._env.logger.info('Swagger API {} detected'.format('has been' if self._has_api else 'NOT'))
+        self.info('Swagger API {} detected'.format('has been' if self._has_api else 'NOT'))
         if not self._has_api:
             return
 
         with open(self._swagger) as io:
             self._spec = load(io.read())
+
+    def info(self, text):
+        self._env.logger.info('[swagger] {}'.format(text))
 
     def activate(self):
         """
@@ -64,9 +67,10 @@ class ONSSwagger(object):
         parts = self._env.get('swagger', self._swagger).split('/')
         return '/'.join(parts[:-1])
 
+    @property
     def file(self):
         parts = self._env.get('swagger', self._swagger).split('/')
-        return '/'.join(parts[-1])
+        return parts[-1]
 
     @property
     def host(self):

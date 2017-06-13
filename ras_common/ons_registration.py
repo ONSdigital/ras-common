@@ -38,17 +38,25 @@ class ONSRegistration(object):
         self._gateway = None
         self._state = False
 
+    def log(self, text):
+        self._env.logger.info('[reg] {}'.format(text))
+
+    def warn(self, text):
+        self._env.logger.warn('[reg] [warning] {}'.format(text))
+
+    def error(self, text):
+        self._env.logger.warn('[reg] [error] {}'.format(text))
+
     def activate(self):
         """
         Load the routing table and kick off the recurring registration process
         """
-        self._env.logger.info('Activating service registration')
-
+        self.log('Activating service registration')
         self._proto = self._env.get('protocol')
         self._gateway = self._env.get('api_gateway')
         if self._proto not in self._ports:
             self._proto = 'http'
-            self._env.logger.info('Protocol defaulting to "http" [protocol=http|https is missing]')
+            self.log('Protocol defaulting to "http" [protocol=http|https is missing]')
 
         if self._proto == 'https':
             self._port = self._ports[self._proto]
@@ -77,9 +85,8 @@ class ONSRegistration(object):
             route = dict(entry, **{'protocol': self._proto, 'host': self._env.host, 'port': self._port})
             resp = requests.post(api_register, verify=False, data={'details': dumps(route)})
             if resp.status_code != 200:
-                print('error registering "{}"'.format(dumps(route)))
-                return False
-            self._env.logger.info('Register endpoint "{}" => "{}"'.format(route, resp.status_code))
+                return self.warn("[{}] {} - {} - {}".format(resp.status_code, api_register, resp.reason, resp.text))
+            self.log('Register endpoint "{}" => "{}"'.format(route, resp.status_code))
         return True
 
     def ping(self):
@@ -97,14 +104,14 @@ class ONSRegistration(object):
             )
             resp = requests.get(api_ping, verify=False)
             if not self._state:
-                self._env.logger.info('Ping "{}" => "{}"'.format(api_ping, resp.status_code))
+                self.log('Ping "{}" => "{}"'.format(api_ping, resp.status_code))
             if resp.status_code not in [200, 204]:
                 self._state = False
-                return self._env.logger.error('"{}" connecting to gateway for "{}"'.format(resp.status_code, api_ping))
+                return self.error('"{}" connecting to gateway for "{}"'.format(resp.status_code, api_ping))
             if resp.status_code == 200:
                 self._state = True
                 return
             self.register_routes()
         except requests.exceptions.ConnectionError as e:
-            self._env.logger.info('ping failed: "{}"'.format(e.args[0].reason))
+            self.log('ping failed: "{}"'.format(e.args[0].reason))
             self._state = False

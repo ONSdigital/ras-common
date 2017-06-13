@@ -24,7 +24,7 @@ from .ons_swagger import ONSSwagger
 from .ons_cryptographer import ONSCryptographer
 from .ons_registration import ONSRegistration
 from socket import socket, AF_INET, SOCK_STREAM
-
+from pathlib import Path
 
 class ONSEnvironment(object):
     """
@@ -50,6 +50,9 @@ class ONSEnvironment(object):
         self._cryptography = ONSCryptographer(self)
         self._registration = ONSRegistration(self)
 
+    def info(self, text):
+        self.logger.info('[env] {}'.format(text))
+
     def activate(self):
         """
         Start the ball rolling ...
@@ -64,6 +67,10 @@ class ONSEnvironment(object):
         self._registration.activate()
 
         if self.swagger.has_api:
+            swagger_file = '{}/{}'.format(self.swagger.path, self.swagger.file)
+            if not Path(swagger_file).is_file():
+                self.info('Unable to access swagger file "{}"'.format(swagger_file))
+                return
             app = App(__name__, specification_dir=self.swagger.path)
             app.add_api(self.swagger.file, arguments={'title': self.ms_name})
             CORS(app.app)
@@ -107,7 +114,7 @@ class ONSEnvironment(object):
         sock.bind(('localhost', 0))
         _, port = sock.getsockname()
         sock.close()
-        self.logger.info('Acquired listening port "{}"'.format(port))
+        self.info('Acquired listening port "{}"'.format(port))
         return port
 
     @property

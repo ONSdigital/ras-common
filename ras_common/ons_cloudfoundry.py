@@ -23,6 +23,9 @@ class ONSCloudFoundry(object):
         self._port = 0
         self._cf_detected = False
 
+    def info(self, text):
+        self._env.logger.info('[cf] {}'.format(text))
+
     def activate(self):
         """
         See if we're running on Cloud Foundry and if we are, run the detection and
@@ -30,7 +33,7 @@ class ONSCloudFoundry(object):
         """
         vcap_application = getenv('VCAP_APPLICATION')
         if not vcap_application:
-            return self._env.logger.info('Platform: LOCAL (no CF detected)')
+            return self.info('Platform: LOCAL (no CF detected)')
         self.info('Platform: CLOUD FOUNDRY')
         self._cf_detected = True
         #
@@ -45,14 +48,14 @@ class ONSCloudFoundry(object):
         #
         vcap_services = getenv('VCAP_SERVICES')
         if not vcap_services:
-            return self._env.logger.info('Services: No services detected')
+            return self.log('Services: No services detected')
         for service in loads(vcap_services).values():
-            credentials = space['credentials']
+            credentials = service['credentials']
             self._env.set('db_connection', credentials['uri'])
             self._env.set('db_connection_name', service['name'])
 
-        self._env.logger.info('DB Connection String: ', credentials['uri'])
-        self._env.logger.info('DB Connection Name..: ', service['name'])
+        self.log('DB Connection String: ', credentials['uri'])
+        self.log('DB Connection Name..: ', service['name'])
 
     @property
     def detected(self):

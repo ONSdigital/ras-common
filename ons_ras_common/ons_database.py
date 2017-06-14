@@ -26,6 +26,18 @@ class ONSDatabase(object):
         self._base = declarative_base()
         self._session = scoped_session(sessionmaker())
 
+    @property
+    def base(self):
+        return self._base
+
+    @property
+    def engine(self):
+        return self._engine
+
+    @property
+    def session(self):
+        return self._session
+
     def info(self, text):
         self._env.logger.info('[db] {}'.format(text))
 
@@ -46,6 +58,7 @@ class ONSDatabase(object):
         self.info('Database connection is "{}"'.format(db_connection))
         self._engine = create_engine(db_connection, convert_unicode=True)
         self._session.remove()
+        self._session.configure(bind=self._engine, autoflush=False, autocommit=False, expire_on_commit=False)
         if self._env.drop_database:
             self.drop()
         self.create()

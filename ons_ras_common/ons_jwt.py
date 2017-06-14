@@ -34,7 +34,7 @@ class ONSJwt(object):
         """
         line = _getframe(1).f_lineno
         name = _getframe(1).f_code.co_name
-        ons_env.logger.log(lvl, "{}: #{} - {}".format(name, line, msg))
+        self._env.logger.info("{}:{}: #{} - {}".format(lvl, name, line, msg))
         return False
 
     def encode(self, data):
@@ -61,8 +61,8 @@ class ONSJwt(object):
         :param request: The incoming request
         :return: Token is value, True or False
         """
-        for entry in request.headers:
-            self.report(INFO, "=>{}".format(entry))
+        #for entry in request.headers:
+        #    self.report(INFO, "=>{}".format(entry))
 
         self.report(INFO, 'validating token "{}" for scope "{}"'.format(jwt_token, scope))
         try:

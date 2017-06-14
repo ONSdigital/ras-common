@@ -14,7 +14,7 @@ should be considered 'alpha' and has only thus far been tested locally.
 
 ```bash
 $ .. (create config.ini and local.ini, sourced from the repo source)
-$virtualenv .build -p python3
+$ virtualenv .build -p python3
 
 Running virtualenv with interpreter .build/bin/python3
 Using real prefix '/usr'

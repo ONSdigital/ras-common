@@ -25,6 +25,7 @@ from .ons_cryptographer import ONSCryptographer
 from .ons_registration import ONSRegistration
 from socket import socket, AF_INET, SOCK_STREAM
 from pathlib import Path
+from os import getcwd
 
 class ONSEnvironment(object):
     """
@@ -53,9 +54,10 @@ class ONSEnvironment(object):
     def info(self, text):
         self.logger.info('[env] {}'.format(text))
 
-    def activate(self):
+    def setup(self):
         """
-        Start the ball rolling ...
+        Setup the various modules, we want to call this specifically from the test routines
+        as they won't want a running reactor for testing purposes ...
         """
         self.setup_ini()
         self._logger.activate()
@@ -64,6 +66,12 @@ class ONSEnvironment(object):
         self._swagger.activate()
         self._jwt.activate()
         self._cryptography.activate()
+
+    def activate(self):
+        """
+        Start the ball rolling ...
+        """
+        self.setup()
         self._registration.activate()
 
         if self.swagger.has_api:
@@ -72,7 +80,7 @@ class ONSEnvironment(object):
                 self.info('Unable to access swagger file "{}"'.format(swagger_file))
                 return
 
-            app = App(__name__, specification_dir='../{}'.format(self.swagger.path))
+            app = App(__name__, specification_dir='{}/{}'.format(getcwd(), self.swagger.path))
             app.add_api(self.swagger.file, arguments={'title': self.ms_name})
             CORS(app.app)
         else:
@@ -130,6 +138,10 @@ class ONSEnvironment(object):
         return self._port
 
     @property
+    def db(self):
+        return self._database
+
+    @property
     def host(self):
         return self._host if self._host else 'localhost'
 
@@ -168,3 +180,7 @@ class ONSEnvironment(object):
     @property
     def ms_name(self):
         return "ONS Micro-Service"
+
+    @property
+    def is_secure(self):
+        return self.get('authentication', 'true').lower() in ['yes', 'true']

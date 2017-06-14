@@ -1,8 +1,9 @@
 include *.py 
-recursive-includes ons_ras_common *.py
-config.ini
-local.ini
-swagger.yaml
-skeleton.py
-runtime.txt
-Procfile
+recursive-include ons_ras_common *.py
+include config.ini
+include local.ini
+include swagger.yaml
+include skeleton.py
+include runtime.txt
+include Procfile
+include requirements.txt

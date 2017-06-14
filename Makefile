@@ -11,9 +11,9 @@ test:
 	@rm -f dist/*
 	@python3 setup.py sdist
 	@python3 setup.py bdist_wheel
-	@twine register -r pypitest dist/ons_ras_common-$(VERSION)-py3-none-any.whl
+	@twine register -r pypitest dist/ons_ras_common-$(VERSION)-py2.py3-none-any.whl
 	@twine upload -r pypitest dist/ons_ras_common-$(VERSION).tar.gz
 
 release:
-	@twine register -r pypi dist/ons_ras_common-$(VERSION)-py3-none-any.whl
+	@twine register -r pypi dist/ons_ras_common-$(VERSION)-py2.py3-none-any.whl
 	@twine upload -r pypi dist/ons_ras_common-$(VERSION).tar.gz

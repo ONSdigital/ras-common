@@ -1,5 +1,5 @@
-PyMamba
-=======
+ONS-RAS-Common
+==============
 
 .. image:: https://travis-ci.org/onsdigital/ons_ras_common.svg?branch=master
     :target: https://travis-ci.org/onsdigital/ons_ras_common

@@ -19,7 +19,7 @@ here = path.abspath(path.dirname(__file__))
 with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = f.read()
 
-__version__ = '0.1.0'
+__version__ = '0.1.1'
 
 setup(
     name='ons_ras_common',
@@ -69,7 +69,7 @@ setup(
     ],
 
     # What does your project relate to?
-    keywords=['micro-service'],
+    keywords=['micro-service', 'ons-ras'],
 
     # You can just specify the packages manually here if your project is
     # simple. Or you can use find_packages().

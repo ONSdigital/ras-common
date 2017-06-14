@@ -21,9 +21,9 @@ class ONSLogger(object):
     """
     def __init__(self, env):
         self._env = env
-        log.startLogging(stdout)
 
     def activate(self):
+        log.startLogging(stdout)
         self.info('[log] Logger activated [environment={}]'.format(self._env.environment))
 
     @staticmethod

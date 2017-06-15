@@ -1,3 +1,14 @@
+### Version 0.1.11
+### Version 0.1.10
+### Version 0.1.9
+
+* Debugging / fixing CF service array handler
+
+### Version 0.1.8
+
+* Rationalise logging in JWT
+* Add cipher as an alias for crypt
+
 ### Version 0.1.7
 
 * Adding missing database binding

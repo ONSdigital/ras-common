@@ -41,20 +41,21 @@ class ONSCloudFoundry(object):
         #
         vcap_application = loads(vcap_application)
         url = vcap_application.get('application_uris', [''])[0]
-        self._host = url.split(':')[0]
-        self._port = int(url.split(':')) if ':' in url else 0
+        self._env.host = url.split(':')[0]
+        self._env.port = int(url.split(':')) if ':' in url else 0
         #
         #   Now get our database connection (if there is one)
         #
         vcap_services = getenv('VCAP_SERVICES')
         if not vcap_services:
             return self.log('Services: No services detected')
-        for service in loads(vcap_services).values():
-            credentials = service['credentials']
-            self._env.set('db_connection', credentials['uri'])
-            self._env.set('db_connection_name', service['name'])
-            self.info('DB Connection String: {}'.format(credentials['uri']))
-            self.info('DB Connection Name..: {}'.format(service['name']))
+        for areas in loads(vcap_services).values():
+            for service in areas:
+                credentials = service.get('credentials', {})
+                self._env.set('db_connection', credentials.get('uri',''))
+                self._env.set('db_connection_name', service.get('name', ''))
+                self.info('DB Connection String: {}'.format(credentials['uri']))
+                self.info('DB Connection Name..: {}'.format(service['name']))
 
     @property
     def detected(self):
@@ -76,8 +77,8 @@ class ONSCloudFoundry(object):
                 "label": "rds",
                 "name": "ras-postgres",
                 "plan": "shared-psql",
-                "provider": null,
-                "syslog_drain_url": null,
+                "provider": None,
+                "syslog_drain_url": None,
                 "tags": [
                     "database",
                     "RDS",
@@ -86,7 +87,6 @@ class ONSCloudFoundry(object):
                 "volume_mounts": []
             }
         ]
-    }
     }
 """
 

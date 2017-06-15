@@ -19,7 +19,7 @@ here = path.abspath(path.dirname(__file__))
 with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = f.read()
 
-__version__ = '0.1.7'
+__version__ = '0.1.11'
 
 setup(
     name='ons_ras_common',
@@ -92,10 +92,7 @@ setup(
     package_data={
         'samples': ['config.ini', 'local.ini', 'main.py', ' swagger.yaml', 'Procfile', 'runtime.txt']
     },
-
     entry_points={
-    'console_scripts': [
-        'ons_ras_common=ons_ras_common:tool',
-    ],
-},
+        'console_scripts': ['ons_ras_common=ons_ras_common.ons_tool:main'],
+    },
 )

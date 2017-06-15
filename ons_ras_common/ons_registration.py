@@ -54,6 +54,7 @@ class ONSRegistration(object):
         self.log('Activating service registration')
         self._proto = self._env.get('protocol')
         self._gateway = self._env.get('api_gateway')
+        self.log("Gateway={}".format(self._gateway))
         if self._proto not in self._ports:
             self._proto = 'http'
             self.log('Protocol defaulting to "http" [protocol=http|https is missing]')

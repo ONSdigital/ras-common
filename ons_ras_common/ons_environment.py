@@ -89,7 +89,7 @@ class ONSEnvironment(object):
         Twisted(app).run(host='0.0.0.0', port=self.port)
 
     def setup_ini(self):
-        self._config.read(['local.ini', 'config.ini', '../config.ini'])
+        self._config.read(['local.ini', '../local.ini', 'config.ini', '../config.ini'])
         self._jwt_algorithm = self.get('jwt_algorithm')
         self._jwt_secret = self.get('jwt_secret')
         self._port = getenv('PORT', self.get('port', self.get_free_port()))
@@ -105,9 +105,9 @@ class ONSEnvironment(object):
         """
         if not section:
             section = self._env
-        value = self._config['microservice'].get(attribute, None)
-        if value:
-            return value
+        if 'microservice' in self._config:
+            if attribute in self._config['microservice']:
+                return self._config['microservice'].get(attribute)
         if section in self._config:
             return self._config[section].get(attribute, default)
         return default
@@ -137,13 +137,21 @@ class ONSEnvironment(object):
     def port(self):
         return self._port
 
-    @property
-    def db(self):
-        return self._database
+    @port.setter
+    def port(self, value):
+        self._port = value
 
     @property
     def host(self):
         return self._host if self._host else 'localhost'
+
+    @host.setter
+    def host(self, value):
+        self._host = value
+
+    @property
+    def db(self):
+        return self._database
 
     @property
     def logger(self):
@@ -155,6 +163,10 @@ class ONSEnvironment(object):
 
     @property
     def crypt(self):
+        return self._cryptography
+
+    @property
+    def cipher(self):
         return self._cryptography
 
     @property

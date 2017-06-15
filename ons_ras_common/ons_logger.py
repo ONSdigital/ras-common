@@ -46,3 +46,18 @@ class ONSLogger(object):
     def critical(text):
         log.msg(text, logLevel=logging.CRITICAL)
 
+#    from sys import _getframe
+#    from logging import WARN, INFO, ERROR
+
+#    def report(self, lvl, msg):
+#        """
+#        Report an issue to the external logging infrastructure
+#        :param lvl: The log level we're outputting to
+#        :param msg: The message we want to log
+#        :return:
+#        """
+#        line = _getframe(1).f_lineno
+#        name = _getframe(1).f_code.co_name
+#        self._env.logger.info("{}:{}: #{} - {}".format(lvl, name, line, msg))
+#        return False
+

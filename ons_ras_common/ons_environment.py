@@ -10,6 +10,12 @@
 #   files, environment variables and anything else that pops up.
 #
 ##############################################################################
+from platform import system
+if system() == "Linux":
+    from twisted.internet import epollreactor
+    epollreactor.install()
+from twisted.internet import reactor
+from twisted.web import client
 from configparser import ConfigParser, ExtendedInterpolation
 from os import getenv
 from connexion import App
@@ -40,6 +46,7 @@ class ONSEnvironment(object):
         self._jwt_secret = None
         self._port = None
         self._host = None
+        self._gateway = None
         self._config = ConfigParser()
         self._config._interpolation = ExtendedInterpolation()
         self._env = getenv('ONS_ENV', 'development')
@@ -67,7 +74,7 @@ class ONSEnvironment(object):
         self._jwt.activate()
         self._cryptography.activate()
 
-    def activate(self):
+    def activate(self, callback=None):
         """
         Start the ball rolling ...
         """
@@ -86,6 +93,11 @@ class ONSEnvironment(object):
         else:
             app = Flask(__name__)
             CORS(app)
+
+        reactor.suggestThreadPoolSize(200)
+        client._HTTP11ClientFactory.noisy = False
+        if callback:
+            callback(app)
         Twisted(app).run(host='0.0.0.0', port=self.port)
 
     def setup_ini(self):
@@ -93,6 +105,7 @@ class ONSEnvironment(object):
         self._jwt_algorithm = self.get('jwt_algorithm')
         self._jwt_secret = self.get('jwt_secret')
         self._port = getenv('PORT', self.get('port', self.get_free_port()))
+        self._gateway = self.get('api_gateway')
 
     def get(self, attribute, default=None, section=None):
         """
@@ -105,12 +118,9 @@ class ONSEnvironment(object):
         """
         if not section:
             section = self._env
-        if 'microservice' in self._config:
-            if attribute in self._config['microservice']:
-                return self._config['microservice'].get(attribute)
-        if section in self._config:
-            return self._config[section].get(attribute, default)
-        return default
+        if section not in self._config:
+            return default
+        return self._config[section].get(attribute, default)
 
     def set(self, attribute, value):
         """
@@ -148,6 +158,10 @@ class ONSEnvironment(object):
     @host.setter
     def host(self, value):
         self._host = value
+
+    @property
+    def gateway(self):
+        return self._gateway
 
     @property
     def db(self):
@@ -196,3 +210,7 @@ class ONSEnvironment(object):
     @property
     def is_secure(self):
         return self.get('authentication', 'true').lower() in ['yes', 'true']
+
+    @property
+    def protocol(self):
+        return self.get('protocol', 'http')

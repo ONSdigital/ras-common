@@ -49,7 +49,7 @@ class ONSDatabase(object):
             return self.info('Database is NOT enabled [missing "enabled_database = true"]')
 
         if not self.check_paths():
-            return self.warn('[swagger_server/models_local/_models.py] file is missing')
+            return self.warn('[swagger_server/models/_models.py] file is missing')
 
         db_connection = self._env.get('db_connection')
         if not db_connection:
@@ -68,11 +68,11 @@ class ONSDatabase(object):
         Check our filesystem for required database files ...
         :return: True if database environment is available
         """
-        return Path('swagger_server/models_local/_models.py').is_file()
+        return Path('swagger_server/models/_models.py').is_file()
 
     def drop(self):
         self.info('Dropping any existing Database Tables')
-        from swagger_server.models_local import _models
+        from swagger_server.models import _models
         connection = self._env.get('db_connection')
         schema = self._env.get('db_schema')
         if connection.startswith('postgres'):
@@ -84,7 +84,7 @@ class ONSDatabase(object):
 
     def create(self):
         self.info('Creating any missing Database tables')
-        from swagger_server.models_local import _models
+        from swagger_server.models import _models
         connection = self._env.get('db_connection')
         schema = self._env.get('db_schema')
         if connection.startswith('postgres'):

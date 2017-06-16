@@ -1,5 +1,21 @@
-### Version 0.1.11
-### Version 0.1.10
+### Version 0.1.21
+
+* Insert an operating system test for the importing of EPOLL
+  (Mac doesn't have this)
+
+### Version 0.1.20
+
+* Repointed models_local to models
+
+### Version 0.1.19
+
+* Introducing callback function for activate
+
+### Version 0.1.18
+
+* Fixing Environment detection
+* First fully working version for collection-instruments
+
 ### Version 0.1.9
 
 * Debugging / fixing CF service array handler

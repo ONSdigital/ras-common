@@ -42,6 +42,7 @@ class ONSSwagger(object):
             self._spec = load(io.read())
 
         self.rewrite_host(self._env.get('api_gateway', 'localhost'))
+        self.flush()
 
     def rewrite_host(self, host):
         """
@@ -49,7 +50,7 @@ class ONSSwagger(object):
         :param host: New host name
         """
         if self._has_api:
-            self._spec['host'] = host
+            self._spec['host'] = '{}:{}'.format(host, self.port)
             self._changed = True
 
     def flush(self):
@@ -83,6 +84,10 @@ class ONSSwagger(object):
         if not self._has_api:
             return ''
         return self._spec.get('host', None)
+
+    @property
+    def port(self):
+        return 443 if self._env.protocol == 'https' else self._env.port
 
     @property
     def base(self):

@@ -20,7 +20,7 @@ class ONSCloudFoundry(object):
     def __init__(self, env):
         self._env = env
         self._host = None
-        self._port = 0
+        #self._port = 0
         self._cf_detected = False
 
     def info(self, text):
@@ -42,7 +42,8 @@ class ONSCloudFoundry(object):
         vcap_application = loads(vcap_application)
         url = vcap_application.get('application_uris', [''])[0]
         self._env.host = url.split(':')[0]
-        self._env.port = int(url.split(':')) if ':' in url else 0
+        self._env.logger.info('Setting host to: {}'.format(self._env.host))
+        #self._env.port = int(url.split(':')) if ':' in url else 0
         #
         #   Now get our database connection (if there is one)
         #

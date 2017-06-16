@@ -35,7 +35,6 @@ class ONSRegistration(object):
         self._routes = []
         self._proto = None
         self._port = None
-        self._gateway = None
         self._state = False
 
     def log(self, text):
@@ -53,8 +52,6 @@ class ONSRegistration(object):
         """
         self.log('Activating service registration')
         self._proto = self._env.get('protocol')
-        self._gateway = self._env.get('api_gateway')
-        self.log("Gateway={}".format(self._gateway))
         if self._proto not in self._ports:
             self._proto = 'http'
             self.log('Protocol defaulting to "http" [protocol=http|https is missing]')
@@ -63,6 +60,9 @@ class ONSRegistration(object):
             self._port = self._ports[self._proto]
         else:
             self._port = self._env.port
+
+        self.log("Gateway={}".format(self._env.gateway))
+        self.log("Port={}".format(self._port))
 
         for path in self._env.swagger.paths:
             uri = self._env.swagger.base + path.split('{')[0].rstrip('/')
@@ -79,7 +79,7 @@ class ONSRegistration(object):
         """
         api_register = '{}://{}:{}/api/1.0.0/register'.format(
             self._proto,
-            self._gateway,
+            self._env.gateway,
             443 if self._proto == 'https' else 8080
         )
         for entry in self._routes:
@@ -98,7 +98,7 @@ class ONSRegistration(object):
         try:
             api_ping = '{}://{}:{}/api/1.0.0/ping/{}/{}'.format(
                 self._proto,
-                self._gateway,
+                self._env.gateway,
                 443 if self._proto == 'https' else 8080,
                 self._env.host,
                 self._port

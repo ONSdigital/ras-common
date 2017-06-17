@@ -4,7 +4,7 @@ python:
 install:
   - pip install -r test-requirements.txt
 script:
-  - ONS_ENV=test pytest --cov=ons_ras_common
+  - ONS_ENV=test PYTHONPATH="`pwd`:$PYTHONPATH" py.test --cov-report term-missing --cov-config=.coveragerc --cov=ons_ras_common/
 after_success:
   - bash <(curl -s https://codecov.io/bash)
 notifications:

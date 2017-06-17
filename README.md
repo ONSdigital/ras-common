@@ -1,16 +1,148 @@
 # ras-common
-Common code for RAS Micro-services based on work originally done as
-a part of the code auto-generation project and common components
-extracted from pre-existing services.
+
+This code is derived from work done as a part of Swagger-Codegen and the API Gateway. It's aim is t
+standardise boilerplate code used by RAS Micro-Services and extricate as much infrastructure as possible
+from the Micro-Service code bases. It should be possible (as demonstrated below) to implement a Micro-Service
+in two lines of code (with a few text based configuration files) that is immediately deployable on Cloud Foundry.
 
 This code is published on the Python Package Index here;
 [https://pypi.python.org/pypi/ons-ras-common](https://pypi.python.org/pypi/ons-ras-common)
 
+### The Modules
+
+These modules are subject to continual change, but every effort will be made to maintain backwards compatibility
+so no future additions should break Micro-Services already using the library. In the event something major *does*
+change that breaks this model, it should be well documented on RAS_Developers. With a view to *not* being 
+immediately subject to any breakage, the recommendation is that *pip freeze* is used to tag Micro-Service
+implementations to specific versions of this library.
+
+* ons_cloudfoundry
+
+  This code is used to automatically detect the presence of Cloud Foundry and amend available environmnt
+  variables accordingly. Useful properties include;
+  
+  * detected - True if we're running on Cloud Foundry
+  
+  This module will also update environment variables *db_name* and *db_connection* if there are any
+  database service credentials available in VCAP_SERVICES.
+
+* ons_cryptograpgher
+
+  This provides *encrypt* and *decrypt* as standard functions, which are intended to be impelented by the
+  platform recommended encryption routines. If you call these functions in preference to implementing your
+  own encryption routine, should the platform recommendation change in the future, using the most recent
+  version of this library should be the only change needed.
+
+* ons_database
+
+  Currently database access if provided via SQLAlchemy over a generic database driver, so within the bounds
+  of current testing the driver in use is database agnostic. This code will interact with the local configuration
+  file and the Cloud Foundry detection module and attempt to automatically connect up your database. There are
+  some additional configuration options that allow you to automatically drop all tables on startup (useful for
+  unit testing), and any missing tables are created from your in-code models. Current support includes both 
+  Postgres and SQLite drivers.
+
+* ons_decorators
+    
+  We are building a library of useful decorators, currently the focus of this module is *validate_jwt*. This
+  can be added to a micro-service endpoint to ensure the endpoint is protected using the currently implemented
+  JWT token authorization. There is a flag in the configuration file that can be used to turn this option off
+  dynamically for testing purposes, and the same flag when applied to the API gateway will cause JWT tokens
+  to be injected into headers as they pass through the gateway, also good for testing. (so there's no real
+  excuse for 'not' protecting every endpoint as it's implemented)
+
+* ons_environment
+
+  The environment model wraps all the others together and provides access to them via a single global variable.
+  To use the package, follow the following pattern;
+  
+  ```python
+  from ons_ras_common import ons_env
+  if __name__ == '__main__':
+      ons_env.activate()
+  ```
+  There are many properties exposed by **ons_env** that provide access to the other underlying modules.
+        
+* ons_jwt
+
+  Wraps the current implementation of our token authorization. The main function *validate* is called by the
+  *validate_jwt* wrapper, but the other functions may be useful. This is likely to be extended in the near
+  future with more functionality.
+
+* ons_logger
+
+  This is a functioning logging system, but currently a placeholder for the 'next generation' logger which will
+  log in JSON format for the centralised Splunk logging infrastructure.
+
+* ons_registration
+
+  In order to become visible to the API gateway for the purposes of endpoint routing, Micro-Services need to
+  register their endpoints (one way or another) with the gateway. This routine provides a connection, registration
+  and keep-alive service for just that. The routines are generic and easy to replicate in other languages should
+  the need arise.
+
+* ons_swagger
+
+  This is a very basic library for managing the local 'swagger' (or API specification) file. It's useful for
+  extracting information (such as a list of endpoints) and re-writing parts of the file, for example to re-point
+  the 'host' component.
+
 #### How to use this code
 
-The easy way is to pip install the package and import the core global
-variable into your code. Note that at the time of writing this procedure
-should be considered 'alpha' and has only thus far been tested locally.
+To set up a new Micro-Service you need the following lines of code;
+
+  ```python
+  from ons_ras_common import ons_env
+  if __name__ == '__main__':
+      ons_env.activate()
+  ```
+
+You will also need the **config.ini** as provided in this repository, and to be useful you also need a swagger.yaml
+file. The location of this file can be set in your config.ini with **swagger =** .. the location of your file. 
+Logging provided should point you in the right direction if this doesn't work.
+
+### Using this code with Unit tests
+
+This needs a little improvement, but currently you will (typically) need to call;
+```python
+ons_env.setup_ini()
+ons_env.db.activate()
+```
+Rather than *activate*.
+
+## Pushing to PyPi
+
+You will need some credentials that are authorized on the account, these need to go into a files
+in your home folder called **.pypirc**;
+
+```ini
+[distutils]
+index-servers = 
+  pypitest
+  pypi
+
+[pypitest]
+repository = https://testpypi.python.org/pypi
+username = (username)
+password = (password)
+
+[pypi]
+repository = https://pypi.python.org/pypi
+username = (username)
+password = (password)
+```
+
+You can only ever push one version ONCE, to do this you need to change the __version__ header in
+setup.py, then the matching __version__ in ons_ras_common/__init__.py, then you need to add an entry
+to *CHANGELOG.md* detailing the change. To actually make the push;
+```bash
+make test && make install
+```
+
+Expect it to take between 20 seconds and 5 mins for the new version to be visible via **pip**.
+
+
+## Example
 
 ```bash
 $ .. (create config.ini and local.ini, sourced from the repo source)
@@ -50,4 +182,3 @@ Type "help", "copyright", "credits" or "license" for more information.
 2017-06-14 09:14:13+0100 [-] [reg] ping return = "<urllib3.connection.HTTPConnection object at 0x7fd08c11fb70>: Failed to establish a new connection: [Errno 111] Connection refused"
 ```
 
-More detail to come once it's been full tested ...

@@ -1,4 +1,5 @@
 # ras-common
+[![Build Status](https://travis-ci.org/ONSdigital/ras-collection-instrument-demo.svg?branch=master)](https://travis-ci.org/ONSdigital/ras-common?branch=twine)
 
 This code is derived from work done as a part of Swagger-Codegen and the API Gateway. It's aim is t
 standardise boilerplate code used by RAS Micro-Services and extricate as much infrastructure as possible

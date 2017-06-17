@@ -1,6 +1,5 @@
 # ras-common
 [![Build Status](https://travis-ci.org/ONSdigital/ras-common.svg?branch=master)](https://travis-ci.org/ONSdigital/ras-common)
-[![codecov](https://codecov.io/gh/ONSdigital/ras-common/branch/master/graph/badge.svg)](https://codecov.io/gh/ONSdigital/ras-common)
 
 This code is derived from work done as a part of Swagger-Codegen and the API Gateway. It's aim is t
 standardise boilerplate code used by RAS Micro-Services and extricate as much infrastructure as possible

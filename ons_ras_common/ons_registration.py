@@ -12,9 +12,13 @@
 #
 ##############################################################################
 from json import dumps
+from twisted.internet.defer import inlineCallbacks
 from twisted.internet.task import LoopingCall
 import urllib3
 import requests
+import treq
+import twisted.internet._sslverify as v
+v.platformTrust = lambda : None
 
 urllib3.disable_warnings()
 
@@ -77,6 +81,12 @@ class ONSRegistration(object):
         Actually apply the routing table to the gateway. This will happen on startup, or any time
         the gateway itself does a reload or restart.
         """
+        @inlineCallbacks
+        def registered(response):
+            if response.code != 200:
+                text = yield response.text()
+                self.error('{} {}'.format(response.code, text))
+
         api_register = '{}://{}:{}/api/1.0.0/register'.format(
             self._proto,
             self._env.gateway,
@@ -84,10 +94,8 @@ class ONSRegistration(object):
         )
         for entry in self._routes:
             route = dict(entry, **{'protocol': self._proto, 'host': self._env.host, 'port': self._port})
-            resp = requests.post(api_register, verify=False, data={'details': dumps(route)})
-            if resp.status_code != 200:
-                return self.warn("[{}] {} - {} - {}".format(resp.status_code, api_register, resp.reason, resp.text))
-            self.log('Register endpoint "{}" => "{}"'.format(route, resp.status_code))
+            treq.post(api_register, data={'details': dumps(route)}).addCallback(registered)
+
         return True
 
     def ping(self):
@@ -103,16 +111,18 @@ class ONSRegistration(object):
                 self._env.host,
                 self._port
             )
-            resp = requests.get(api_ping, verify=False)
-            if not self._state:
-                self.log('Ping "{}" => "{}"'.format(api_ping, resp.status_code))
-            if resp.status_code not in [200, 204]:
-                self._state = False
-                return self.error('"{}" connecting to gateway for "{}"'.format(resp.status_code, api_ping))
-            if resp.status_code == 200:
-                self._state = True
-                return
-            self.register_routes()
+            def status_check(response):
+                if response.code == 200:
+                    self.error('200 - NO ACTION')
+                elif response.code == 204:
+                    self.error('200 - REGISTER')
+                    self.register_routes()
+                else:
+                    self.error('{} - UNKNOWN ERROR'.format(response.code))
+                return response
+
+            treq.get(api_ping).addCallback(status_check)
+
         except requests.exceptions.ConnectionError as e:
             self.log('ping failed for "{}"'.format(api_ping))
             self.log('ping return = "{}"'.format(e.args[0].reason))

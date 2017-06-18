@@ -18,7 +18,7 @@ import urllib3
 import requests
 import treq
 import twisted.internet._sslverify as v
-v.platformTrust = lambda : None
+v.platformTrust = lambda: None
 
 urllib3.disable_warnings()
 
@@ -65,8 +65,8 @@ class ONSRegistration(object):
         else:
             self._port = self._env.port
 
-        self.log("Gateway={}".format(self._env.gateway))
-        self.log("Port={}".format(self._port))
+        #self.log("Gateway={}".format(self._env.gateway))
+        #self.log("Port={}".format(self._port))
 
         for path in self._env.swagger.paths:
             uri = self._env.swagger.base + path.split('{')[0].rstrip('/')

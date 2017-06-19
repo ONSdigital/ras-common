@@ -23,6 +23,8 @@ class ONSLogger(object):
         self._env = env
 
     def activate(self):
+        logging.getLogger('twisted').setLevel(logging.ERROR)
+        logging.getLogger('werkzeug').setLevel(logging.ERROR)
         log.startLogging(stdout)
         self.info('[log] Logger activated [environment={}]'.format(self._env.environment))
 

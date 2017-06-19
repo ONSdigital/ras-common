@@ -138,7 +138,7 @@ You can only ever push one version ONCE, to do this you need to change the __ver
 setup.py, then the matching __version__ in ons_ras_common/__init__.py, then you need to add an entry
 to *CHANGELOG.md* detailing the change. To actually make the push;
 ```bash
-make test && make install
+make check && make install
 ```
 
 Expect it to take between 20 seconds and 5 mins for the new version to be visible via **pip**.

@@ -84,12 +84,12 @@ class ONSDatabase(object):
 
     def create(self):
         self.info('Creating any missing Database tables')
-        from swagger_server.models import _models
         connection = self._env.get('db_connection')
         schema = self._env.get('db_schema')
         if connection.startswith('postgres'):
             self.info('Creating Database schema "{}"'.format(schema))
             self._base.metadata.schema = schema
+        from swagger_server.models import _models
 
         if connection.startswith('postgres'):
             self.info("Creating schema {} if it does't exist".format(schema))

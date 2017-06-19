@@ -1,3 +1,9 @@
+### Version 0.1.26
+
+[Testing ...]
+* Adding SHIM capabilities, i.e. 'remote_ms' environment variable
+* This version also has fully ASYNC registration
+
 ### Version 0.1.21
 
 * Insert an operating system test for the importing of EPOLL

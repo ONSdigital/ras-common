@@ -47,6 +47,14 @@ class ONSEnvironment(object):
         self._port = None
         self._host = None
         self._gateway = None
+
+        self.api_protocol = None
+        self.api_host = None
+        self.api_port = None
+        self.flask_protocol = None
+        self.flask_host = None
+        self.flask_port = None
+
         self._config = ConfigParser()
         self._config._interpolation = ExtendedInterpolation()
         self._env = getenv('ONS_ENV', 'development')
@@ -104,8 +112,14 @@ class ONSEnvironment(object):
         self._config.read(['local.ini', '../local.ini', 'config.ini', '../config.ini'])
         self._jwt_algorithm = self.get('jwt_algorithm')
         self._jwt_secret = self.get('jwt_secret')
-        self._port = getenv('PORT', self.get('port', self.get_free_port()))
+        self._port = self.get('port', getenv('PORT', self.get_free_port()))
         self._gateway = self.get('api_gateway')
+        self.api_host = self.get('api_host')
+        self.api_port = self.get('api_port')
+        self.api_protocol = self.get('api_protocol')
+        self.flask_host = self.get('flask_host')
+        self.flask_port = self.get('flask_port')
+        self.flask_protocol = self.get('flask_protocol')
 
     def get(self, attribute, default=None, section=None):
         """
@@ -214,3 +228,51 @@ class ONSEnvironment(object):
     @property
     def protocol(self):
         return self.get('protocol', 'http')
+
+    @property
+    def api_protocol(self):
+        return self._api_protocol
+
+    @api_protocol.setter
+    def api_protocol(self, value):
+        self._api_protocol = value
+
+    @property
+    def api_host(self):
+        return self._api_host
+
+    @api_host.setter
+    def api_host(self, value):
+        self._api_host = value
+
+    @property
+    def api_port(self):
+        return self._api_port
+
+    @api_port.setter
+    def api_port(self, value):
+        self._api_port = value
+
+    @property
+    def flask_protocol(self):
+        return self._flask_protocol
+
+    @flask_protocol.setter
+    def flask_protocol(self, value):
+        self._flask_protocol = value
+
+    @property
+    def flask_host(self):
+        return self._flask_host
+
+    @flask_host.setter
+    def flask_host(self, value):
+        self._flask_host = value
+
+    @property
+    def flask_port(self):
+        return self._flask_port
+
+    @flask_port.setter
+    def flask_port(self, value):
+        self._flask_port = value

@@ -42,19 +42,25 @@ class ONSSwagger(object):
             self._spec = load(io.read())
 
         remote_ms = self._env.get('remote_ms', None)
-        api_gateway = self._env.get('api_gateway', 'localhost')
-        host = remote_ms if remote_ms else api_gateway
-        self.info('Remote MS={} host={}'.format(remote_ms, host))
-        self.rewrite_host(host)
+        if remote_ms:
+            self.rewrite_host(remote_ms, 443)
+        else:
+            self.clear_host()
+
         self.flush()
 
-    def rewrite_host(self, host):
+    def clear_host(self):
+        if self._has_api and 'host' in self._spec:
+            del self._spec['host']
+            self._changed = True
+
+    def rewrite_host(self, host, port):
         """
         Update the host component in the Swagger specification
         :param host: New host name
         """
         if self._has_api:
-            self._spec['host'] = '{}:{}'.format(host, self.port)
+            self._spec['host'] = '{}:{}'.format(host, port)
             self._changed = True
 
     def flush(self):

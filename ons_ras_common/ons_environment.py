@@ -113,12 +113,12 @@ class ONSEnvironment(object):
         self._jwt_algorithm = self.get('jwt_algorithm')
         self._jwt_secret = self.get('jwt_secret')
         self._port = self.get('port', getenv('PORT', self.get_free_port()))
-        self._gateway = self.get('api_gateway')
+        #self._gateway = self.get('api_host')
         self.api_host = self.get('api_host')
         self.api_port = self.get('api_port')
         self.api_protocol = self.get('api_protocol')
         self.flask_host = self.get('flask_host')
-        self.flask_port = self.get('flask_port')
+        self.flask_port = self.get('flask_port', self._port)
         self.flask_protocol = self.get('flask_protocol')
 
     def get(self, attribute, default=None, section=None):
@@ -175,7 +175,8 @@ class ONSEnvironment(object):
 
     @property
     def gateway(self):
-        return self._gateway
+        #return self._gateway
+        return self.api_host
 
     @property
     def db(self):
@@ -227,7 +228,8 @@ class ONSEnvironment(object):
 
     @property
     def protocol(self):
-        return self.get('protocol', 'http')
+        #return self.get('api_protocol', 'http')
+        return self.api_protocol
 
     @property
     def api_protocol(self):

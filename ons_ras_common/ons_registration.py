@@ -125,8 +125,8 @@ class ONSRegistration(object):
                 uri = self._env.swagger.base
                 self._env.logger.info("URI=({}), len={}".format(uri, len(uri)))
                 if len(uri):
-                    if uri[-1] != '/':
-                        uri += '/'
+                    if uri[-1] == '/':
+                        uri = uri[:-1]
                 uri += path
                 route = {
                     'protocol': self._env.flask_protocol,

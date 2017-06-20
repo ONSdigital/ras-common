@@ -103,7 +103,7 @@ class ONSSwagger(object):
     def base(self):
         if not self._has_api:
             return ''
-        return self._spec.get('basePath', None)
+        return self._spec.get('basePath', '')
 
     @property
     def paths(self):

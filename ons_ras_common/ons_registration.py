@@ -100,6 +100,7 @@ class ONSRegistration(object):
             remote_ms = self._env.get('remote_ms', None)
 
             for path in self._env.swagger.paths:
+                print("BASE:", self._env.swagger.base)
                 uri = self._env.swagger.base + path.split('{')[0].rstrip('/')
                 #self._routes.append({'uri': uri})
                 if remote_ms:
@@ -123,9 +124,10 @@ class ONSRegistration(object):
             swagger_paths.append(ui)
 
             for path in swagger_paths:
-                uri = self._env.swagger.base
-                if uri[-1] != '/':
-                    uri += '/'
+                if len(self._env.swagger.base):
+                    uri = self._env.swagger.base
+                    if uri[-1] != '/':
+                        uri += '/'
                 uri += path
                 route = {
                     'protocol': self._env.flask_protocol,

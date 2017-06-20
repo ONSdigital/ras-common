@@ -40,12 +40,16 @@ class ONSSwagger(object):
 
         with open(self._swagger) as io:
             self._spec = load(io.read())
+#api_protocol = https
+#api_host = api-demo.apps.mvp.onsclofo.uk
+#api_port = 443
 
+        self.rewrite_host(self._env.api_host, self._env.api_port)
         #remote_ms = self._env.get('remote_ms', None)
         #if remote_ms:
         #    self.rewrite_host(remote_ms, 443)
         #else:
-        self.clear_host()
+        #self.clear_host()
         self.flush()
 
     def clear_host(self):

@@ -2,6 +2,9 @@ VERSION=`python3 -c "import ons_ras_common; print(ons_ras_common.__version__)"`
 
 all:
 	@echo "Current version is: $(VERSION)"
+	@rm -f dist/*
+	@python3 setup.py sdist
+	@python3 setup.py bdist_wheel
 
 clean:
 	@rm -rfv unit-db

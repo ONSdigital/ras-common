@@ -97,7 +97,7 @@ class ONSEnvironment(object):
 
             swagger_ui = self.get('swagger_ui', 'ui')
             app = App(__name__, specification_dir='{}/{}'.format(getcwd(), self.swagger.path))
-            app.add_api(self.swagger.file, arguments={'title': self.ms_name}, swagger_ui=swagger_ui)
+            app.add_api(self.swagger.file, arguments={'title': self.ms_name}, swagger_url=swagger_ui)
             CORS(app.app)
         else:
             app = Flask(__name__)

@@ -95,8 +95,9 @@ class ONSEnvironment(object):
                 self.info('Unable to access swagger file "{}"'.format(swagger_file))
                 return
 
+            swagger_ui = self.get('swagger_ui', 'ui')
             app = App(__name__, specification_dir='{}/{}'.format(getcwd(), self.swagger.path))
-            app.add_api(self.swagger.file, arguments={'title': self.ms_name})
+            app.add_api(self.swagger.file, arguments={'title': self.ms_name}, swagger_ui=swagger_ui)
             CORS(app.app)
         else:
             app = Flask(__name__)
@@ -106,6 +107,7 @@ class ONSEnvironment(object):
         client._HTTP11ClientFactory.noisy = False
         if callback:
             callback(app)
+
         Twisted(app).run(host='0.0.0.0', port=self.port)
 
     def setup_ini(self):

@@ -26,11 +26,6 @@ urllib3.disable_warnings()
 
 class ONSRegistration(object):
 
-    _ports = {
-        'https': 443,
-        'http': 8080
-    }
-
     def __init__(self, env):
         """
         Set up configuration and local variables
@@ -41,6 +36,7 @@ class ONSRegistration(object):
         self._proto = None
         self._port = None
         self._state = False
+        self._key = None
 
     def log(self, text):
         self._env.logger.info('[reg] {}'.format(text))
@@ -59,20 +55,28 @@ class ONSRegistration(object):
         Load the routing table and kick off the recurring registration process
         """
         self.log('Activating service registration')
-        prefix = self._env.get('swagger_ui_prefix', '')
-        prefix_len = len(prefix)
-        try:
-            for path in self._env.swagger.paths:
-                uri = self._env.swagger.base + path.split('{')[0].rstrip('/')
-                if prefix_len:
-                    uri = uri[prefix_len:]
-                print(">>", uri)
-                self._routes.append({'uri': uri})
-            for path in ['ui/', 'ui/css', 'ui/lib', 'ui/images', 'swagger.json']:
-                uri = self._env.swagger.base + '/' + path
-                self._routes.append({'uri': uri})
-        except Exception as e:
-            print("ERROR: ", str(e))
+        legacy_key = '{}:{}'.format(self._env.flask_host, self._env.flask_port)
+        self._key = self._env.get('my_ident', legacy_key, 'microservice')
+        print("MY KEY = ", self._key)
+
+
+
+        #try:
+        #    for path in self._env.swagger.paths:
+        #        uri = self._env.swagger.base + path.split('{')[0].rstrip('/')
+        #        self._routes.append({'uri': uri})
+
+         #   swagger_paths = ['ui/css', 'ui/lib', 'ui/images', 'swagger.json']
+         #   swagger_paths.append(self._env.get('swagger_ui', 'ui')+'/')
+
+#            for path in swagger_paths:
+#                uri = self._env.swagger.base
+#                if uri[-1] != '/':
+#                    uri += '/'
+#                uri += path
+#                self._routes.append({'uri': uri})
+#        except Exception as e:
+#            print("ERROR: ", str(e))
 
         LoopingCall(self.ping).start(5, now=False)
 
@@ -88,52 +92,55 @@ class ONSRegistration(object):
                 self.error('{} {}'.format(response.code, text))
 
         try:
-
-            #host = self._env.get('host', self._env.host)
-            #if host == 'localhost' or self._proto != 'https':
-            #    port = 8080
-            #    proto = 'http'
-            #else:
-            #    proto = 'https'
-            #    port = 443
-
-            #remote_ms = self._env.get('remote_ms', None)
-            #if remote_ms:
-            #    dest = {'protocol': 'https', 'host': remote_ms, 'port': 443}
-            #else:
-            #    dest = {'protocol': proto, 'host': host, 'port': self._port}
-
             api_register = '{}://{}:{}/api/1.0.0/register'.format(
                 self._env.api_protocol,
                 self._env.api_host,
                 self._env.api_port
             )
             remote_ms = self._env.get('remote_ms', None)
-            if remote_ms:
-                dest = {
-                    'protocol': 'https',
-                    'host': remote_ms,
-                    'port': 443
-                }
-            else:
-                dest = {
+
+            for path in self._env.swagger.paths:
+                uri = self._env.swagger.base + path.split('{')[0].rstrip('/')
+                #self._routes.append({'uri': uri})
+                if remote_ms:
+                    route = {
+                        'protocol': 'https',
+                        'host': remote_ms,
+                        'port': 443,
+                    }
+                else:
+                    route = {
+                        'protocol': self._env.flask_protocol,
+                        'host': self._env.flask_host,
+                        'port': self._env.flask_port,
+                    }
+                route = dict(route, **{'uri': uri, 'key': self._key})
+                self._env.logger.info("====> {}".format(route))
+                treq.post(api_register, data={'details': dumps(route)}).addCallback(registered)
+
+            swagger_paths = ['ui/css', 'ui/lib', 'ui/images', 'swagger.json']
+            ui = self._env.get('swagger_ui', 'ui')+'/'
+            swagger_paths.append(ui)
+
+            for path in swagger_paths:
+                uri = self._env.swagger.base
+                if uri[-1] != '/':
+                    uri += '/'
+                uri += path
+                route = {
                     'protocol': self._env.flask_protocol,
                     'host': self._env.flask_host,
-                    'port': self._env.flask_port
+                    'port': self._env.flask_port,
+                    'uri': uri,
+                    'key': self._key,
+                    'ui': path == ui
                 }
-            #api_register = '{}://{}:{}/api/1.0.0/register'.format(
-            #    self._env.api_protocol, self._env.api_host, self._env.api_port)
-
-            #    proto, self._env.gateway, port)
-            #api_register = '{}/api/1.0.0/register'.format(self._env.get('api_connection'))
-            #self.warn('Register> {}'.format(api_register))
-            #print('Register> {}'.format(api_register))
-
-            self._env.logger.info(dest)
-
-            for entry in self._routes:
-                route = dict(entry, **dest)
+                self._env.logger.info("====> {}".format(route))
                 treq.post(api_register, data={'details': dumps(route)}).addCallback(registered)
+
+            #for entry in self._routes:
+            #    route = dict(entry, **dest)
+            #    treq.post(api_register, data={'details': dumps(route)}).addCallback(registered)
 
             return True
         except Exception as e:
@@ -144,31 +151,21 @@ class ONSRegistration(object):
         Start a timer which will bounce messages off the API gateway on a regular basis and (re)register
         endpoints if they're not already registered.
         """
-        #host = self._env.get('host', self._env.host)
-        #if host == 'localhost' or self._proto != 'https':
-        #    port = 8080
-        #    proto = 'http'
-        #else:
-        #    proto = 'https'
-        #    port = 443
-
         try:
             #api_ping = '{}://{}:{}/api/1.0.0/ping/{}/{}'.format(
-            #    proto,
-            #    self._env.gateway,
-            #    port,
-            #    host,
-            #    self._port
+            #    self._env.api_protocol,
+            #    self._env.api_host,
+            #    self._env.api_port,
+            #    self._env.flask_host,
+            #    self._env.flask_port
             #)
-            api_ping = '{}://{}:{}/api/1.0.0/ping/{}/{}'.format(
+            api_ping = '{}://{}:{}/api/1.0.0/ping/{}/None'.format(
                 self._env.api_protocol,
                 self._env.api_host,
                 self._env.api_port,
-                self._env.flask_host,
-                self._env.flask_port
+                self._key
             )
-            self.log(api_ping)
-            print(api_ping)
+
             def status_check(response):
                 if response.code == 200:
                     self.error('200 - NO ACTION')

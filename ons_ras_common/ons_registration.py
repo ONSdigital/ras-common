@@ -123,6 +123,7 @@ class ONSRegistration(object):
 
             for path in swagger_paths:
                 uri = self._env.swagger.base
+                self._env.logger.info("URI=({}), len={}".format(uri, len(uri)))
                 if len(uri):
                     if uri[-1] != '/':
                         uri += '/'

@@ -29,6 +29,7 @@ from .ons_jwt import ONSJwt
 from .ons_swagger import ONSSwagger
 from .ons_cryptographer import ONSCryptographer
 from .ons_registration import ONSRegistration
+from .ons_rabbit import ONSRabbit
 from socket import socket, AF_INET, SOCK_STREAM
 from pathlib import Path
 from os import getcwd
@@ -47,7 +48,7 @@ class ONSEnvironment(object):
         self._port = None
         self._host = None
         self._gateway = None
-
+        self._debug = None
         self.api_protocol = None
         self.api_host = None
         self.api_port = None
@@ -60,6 +61,7 @@ class ONSEnvironment(object):
         self._env = getenv('ONS_ENV', 'development')
         self._logger = ONSLogger(self)
         self._database = ONSDatabase(self)
+        self._rabbit = ONSRabbit(self)
         self._cloudfoundry = ONSCloudFoundry(self)
         self._swagger = ONSSwagger(self)
         self._jwt = ONSJwt(self)
@@ -81,6 +83,7 @@ class ONSEnvironment(object):
         self._swagger.activate()
         self._jwt.activate()
         self._cryptography.activate()
+        self._rabbit.activate()
 
     def activate(self, callback=None):
         """
@@ -122,6 +125,7 @@ class ONSEnvironment(object):
         self.flask_host = self.get('flask_host')
         self.flask_port = self.get('flask_port', self._port)
         self.flask_protocol = self.get('flask_protocol')
+        self._debug = self.get('debug', False).lower() in ['yes', 'true']
 
     def get(self, attribute, default=None, section=None):
         """
@@ -280,3 +284,11 @@ class ONSEnvironment(object):
     @flask_port.setter
     def flask_port(self, value):
         self._flask_port = value
+
+    @property
+    def rabbit(self):
+        return self._rabbit
+
+    @property
+    def debug(self):
+        return self._debug

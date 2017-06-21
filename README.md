@@ -2,13 +2,15 @@
 [![Build Status](https://travis-ci.org/ONSdigital/ras-common.svg?branch=twine)](https://travis-ci.org/ONSdigital/ras-common)
 [![codecov](https://codecov.io/gh/ONSdigital/ras-common/branch/twine/graph/badge.svg)](https://codecov.io/gh/ONSdigital/ras-common)
 
-This code is derived from work done as a part of Swagger-Codegen and the API Gateway. It's aim is t
+This code is derived from work done as a part of Swagger-Codegen and the API Gateway. It's aim is to
 standardise boilerplate code used by RAS Micro-Services and extricate as much infrastructure as possible
 from the Micro-Service code bases. It should be possible (as demonstrated below) to implement a Micro-Service
 in two lines of code (with a few text based configuration files) that is immediately deployable on Cloud Foundry.
 
-This code is published on the Python Package Index here;
-[https://pypi.python.org/pypi/ons-ras-common](https://pypi.python.org/pypi/ons-ras-common)
+This code WAS published on the Python Package Index here;
+[https://pypi.python.org/pypi/ons-ras-common](https://pypi.python.org/pypi/ons-ras-common) but this is being obsoleted
+in favour of using the GitHub "requirements" feature. i.e. the package is pulled in directly from GitHub rather than
+via Pypi.
 
 ### The Modules
 
@@ -112,40 +114,26 @@ ons_env.db.activate()
 ```
 Rather than *activate*.
 
-## Pushing to PyPi
+## Providing an installable package
 
-You will need some credentials that are authorized on the account, these need to go into a files
-in your home folder called **.pypirc**;
+When you have a change you wish to publish, follow these steps;
 
-```ini
-[distutils]
-index-servers = 
-  pypitest
-  pypi
+1. Update the version listed in setup.py
+2. Update the version listed in ons_ras_common/__init__.py
+3. Type "make"
+4. git commit -a -m "(version number)" && git push
 
-[pypitest]
-repository = https://testpypi.python.org/pypi
-username = (username)
-password = (password)
-
-[pypi]
-repository = https://pypi.python.org/pypi
-username = (username)
-password = (password)
-```
-
-You can only ever push one version ONCE, to do this you need to change the __version__ header in
-setup.py, then the matching __version__ in ons_ras_common/__init__.py, then you need to add an entry
-to *CHANGELOG.md* detailing the change. To actually make the push;
-```bash
-make check && make install
-```
-
-Expect it to take between 20 seconds and 5 mins for the new version to be visible via **pip**.
+Don't forget to put a comment in *CHANGELOG.md* detailing the change.
 
 
 ## Example
 
+Copy main.py from the repo and create a requirements.txt with the following line;
+```bash
+git+https://github.com/ONSdigital/ras-common.git@shim#ons_ras_common==0.1.82
+```
+
+Then;
 ```bash
 $ .. (create config.ini and local.ini, sourced from the repo source)
 $ virtualenv .build -p python3
@@ -154,33 +142,23 @@ Running virtualenv with interpreter .build/bin/python3
 Using real prefix '/usr'
 Installing setuptools, pkg_resources, pip, wheel...done.
 (.build) $ source .build/bin/activate
-(.build) $ pip install ons_ras_common
-Collecting ons_ras_common
-  Downloading ons_ras_common-0.1.1.tar.gz
-
+(.build) $ pip install -r requirements.txt
 (.. lots of depency stuff ..)
-Successfully built ons-ras-common
-Installing collected packages: attrs, six, Automat, certifi, chardet, click, PyYAML, clickclick, jsonschema, inflection, itsdangerous, MarkupSafe, Jinja2, Werkzeug, Flask, typing, swagger-spec-validator, idna, urllib3, requests, connexion, constantly, ecdsa, Flask-Cors, incremental, zope.interface, hyperlink, Twisted, observable, Flask-Twisted, future, psycopg2, pycrypto, python-jose, SQLAlchemy, ons-ras-common
-Successfully installed Automat-0.6.0 Flask-0.12.2 Flask-Cors-3.0.2 Flask-Twisted-0.1.2 Jinja2-2.9.6 MarkupSafe-1.0 PyYAML-3.12 SQLAlchemy-1.1.10 Twisted-17.5.0 Werkzeug-0.12.2 attrs-17.2.0 certifi-2017.4.17 chardet-3.0.4 click-6.7 clickclick-1.2.1 connexion-1.1.10 constantly-15.1.0 ecdsa-0.13 future-0.16.0 hyperlink-17.1.1 idna-2.5 incremental-17.5.0 inflection-0.3.1 itsdangerous-0.24 jsonschema-2.6.0 observable-0.3.2 ons-ras-common-0.1.1 psycopg2-2.7.1 pycrypto-2.6.1 python-jose-1.3.2 requests-2.17.3 six-1.10.0 swagger-spec-validator-2.1.0 typing-3.6.1 urllib3-1.21.1 zope.interface-4.4.1
 
-(.build) $ python3
+$ python3
 Python 3.5.3 (default, Jan 19 2017, 14:11:04)
 [GCC 6.3.0 20170118] on linux
 Type "help", "copyright", "credits" or "license" for more information.
 >>> from ons_ras_common import ons_env
 >>> ons_env.activate()
-2017-06-14 09:14:08+0100 [-] Log opened.
-2017-06-14 09:14:08+0100 [-] [log] Logger activated [environment=development]
-2017-06-14 09:14:08+0100 [-] [cf] Platform: LOCAL (no CF detected)
-2017-06-14 09:14:08+0100 [-] [db] [warning] [swagger_server/models_local/_models.py] file is missing
-2017-06-14 09:14:08+0100 [-] [swagger] Swagger API NOT detected
-2017-06-14 09:14:08+0100 [-] [crypto] Setting crypto key to "ONS_DUMMY_KEY"
-2017-06-14 09:14:08+0100 [-] [reg] Activating service registration
-2017-06-14 09:14:08+0100 [-] [reg] ping failed for "http://localhost:8080/api/1.0.0/ping/localhost/59733"
-2017-06-14 09:14:08+0100 [-] [reg] ping return = "<urllib3.connection.HTTPConnection object at 0x7fd08c387278>: Failed to establish a new connection: [Errno 111] Connection refused"
-2017-06-14 09:14:08+0100 [-] Site starting on 59733
-2017-06-14 09:14:08+0100 [-] Starting factory <twisted.web.server.Site object at 0x7fd08c387e80>
-2017-06-14 09:14:13+0100 [-] [reg] ping failed for "http://localhost:8080/api/1.0.0/ping/localhost/59733"
-2017-06-14 09:14:13+0100 [-] [reg] ping return = "<urllib3.connection.HTTPConnection object at 0x7fd08c11fb70>: Failed to establish a new connection: [Errno 111] Connection refused"
+2017-06-21 08:43:29+0100 [-] Log opened.
+2017-06-21 08:43:29+0100 [-] [log] Logger activated [environment=development]
+2017-06-21 08:43:29+0100 [-] [cf] Platform: LOCAL (no CF detected)
+2017-06-21 08:43:29+0100 [-] [db] [warning] [swagger_server/models/_models.py] file is missing
+2017-06-21 08:43:29+0100 [-] [swagger] Swagger API NOT detected
+2017-06-21 08:43:29+0100 [-] [crypto] Setting crypto key to "ONS_DUMMY_KEY"
+2017-06-21 08:43:29+0100 [-] [reg] Activating service registration
+2017-06-21 08:43:29+0100 [-] Site starting on 33751
+2017-06-21 08:43:29+0100 [-] Starting factory <twisted.web.server.Site object at 0x7ff6ab840d30>
 ```
 

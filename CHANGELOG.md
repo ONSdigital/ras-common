@@ -1,3 +1,8 @@
+### Version 0.1.82
+
+[Massive amount of refactoring and integration]
+* This version is compatible with release/0.3 and above
+
 ### Version 0.1.26
 
 [Testing ...]

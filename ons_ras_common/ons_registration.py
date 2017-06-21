@@ -57,27 +57,6 @@ class ONSRegistration(object):
         self.log('Activating service registration')
         legacy_key = '{}:{}'.format(self._env.flask_host, self._env.flask_port)
         self._key = self._env.get('my_ident', legacy_key, 'microservice')
-        print("MY KEY = ", self._key)
-
-
-
-        #try:
-        #    for path in self._env.swagger.paths:
-        #        uri = self._env.swagger.base + path.split('{')[0].rstrip('/')
-        #        self._routes.append({'uri': uri})
-
-         #   swagger_paths = ['ui/css', 'ui/lib', 'ui/images', 'swagger.json']
-         #   swagger_paths.append(self._env.get('swagger_ui', 'ui')+'/')
-
-#            for path in swagger_paths:
-#                uri = self._env.swagger.base
-#                if uri[-1] != '/':
-#                    uri += '/'
-#                uri += path
-#                self._routes.append({'uri': uri})
-#        except Exception as e:
-#            print("ERROR: ", str(e))
-
         LoopingCall(self.ping).start(5, now=False)
 
     def register_routes(self):
@@ -123,7 +102,6 @@ class ONSRegistration(object):
 
             for path in swagger_paths:
                 uri = self._env.swagger.base
-                self._env.logger.info("URI=({}), len={}".format(uri, len(uri)))
                 if len(uri):
                     if uri[-1] == '/':
                         uri = uri[:-1]
@@ -136,12 +114,7 @@ class ONSRegistration(object):
                     'key': self._key,
                     'ui': path == ui
                 }
-                self._env.logger.info("====> {}".format(route))
                 treq.post(api_register, data={'details': dumps(route)}).addCallback(registered)
-
-            #for entry in self._routes:
-            #    route = dict(entry, **dest)
-            #    treq.post(api_register, data={'details': dumps(route)}).addCallback(registered)
 
             return True
         except Exception as e:
@@ -153,13 +126,6 @@ class ONSRegistration(object):
         endpoints if they're not already registered.
         """
         try:
-            #api_ping = '{}://{}:{}/api/1.0.0/ping/{}/{}'.format(
-            #    self._env.api_protocol,
-            #    self._env.api_host,
-            #    self._env.api_port,
-            #    self._env.flask_host,
-            #    self._env.flask_port
-            #)
             api_ping = '{}://{}:{}/api/1.0.0/ping/{}/None'.format(
                 self._env.api_protocol,
                 self._env.api_host,
@@ -168,12 +134,10 @@ class ONSRegistration(object):
             )
 
             def status_check(response):
-                if response.code == 200:
-                    self.error('200 - NO ACTION')
-                elif response.code == 204:
+                if response.code == 204:
                     self.error('200 - REGISTER')
                     self.register_routes()
-                else:
+                elif response.code != 200:
                     self.error('{} - UNKNOWN ERROR'.format(response.code))
                 return response
 

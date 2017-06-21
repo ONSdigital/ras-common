@@ -61,32 +61,3 @@ class ONSCloudFoundry(object):
         return self._cf_detected
 
 
-
-"""
-    "VCAP_SERVICES": {
-        "rds": [
-            {
-                "credentials": {
-                    "db_name": "db9nh2xczpqu91sh1",
-                    "host": "mvp-applicationdb.cef6vnd8djsq.eu-central-1.rds.amazonaws.com",
-                    "password": "u23hxhq228uv4xn5lro6og5fk",
-                    "uri": "postgres://ugysr9v3llul8e8i:u23hxhq228uv4xn5lro6og5fk@mvp-applicationdb.cef6vnd8djsq.eu-central-1.rds.amazonaws.com:5432/db9nh2xczpqu91sh1",
-                    "username": "ugysr9v3llul8e8i"
-                },
-                "label": "rds",
-                "name": "ras-postgres",
-                "plan": "shared-psql",
-                "provider": null,
-                "syslog_drain_url": null,
-                "tags": [
-                    "database",
-                    "RDS",
-                    "postgresql"
-                ],
-                "volume_mounts": []
-            }
-        ]
-    }
-    }
-"""
-

@@ -38,13 +38,14 @@ class ONSDatabase(object):
     def session(self):
         return self._session
 
-    def info(self, text):
-        self._env.logger.info('[db] {}'.format(text))
-
     def warn(self, text):
-        self._env.logger.warn('[db] [warning] {}'.format(text))
+        self._env.logger.warn(text, module=__name__)
+
+    def info(self, text):
+        self._env.logger.info(text, module=__name__)
 
     def activate(self):
+
         if self._env.get('enable_database', 'false').lower() not in ['true', 'yes']:
             return self.info('Database is NOT enabled [missing "enabled_database = true"]')
 

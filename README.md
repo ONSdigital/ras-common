@@ -91,6 +91,14 @@ implementations to specific versions of this library.
   extracting information (such as a list of endpoints) and re-writing parts of the file, for example to re-point
   the 'host' component.
 
+* ons_rabbit
+
+  This is a wrapper for RabbitMQ connections and works with the Cloud Foundry module to detect whether there is a
+  Rabbit Queue available, and if there is, makes the credentials available as properties. i.e. if you have a queue
+  installed you should have **onv_env.rabbit.**{*host,port,name,username,password*}. Alternatively you can put
+  local defaults in your config.ini using **rabbit_**{*host,port,name,username,password*}. See the **development**
+  section in this repo's config.ini for an example.
+
 #### How to use this code
 
 To set up a new Micro-Service you need the following lines of code;

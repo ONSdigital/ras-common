@@ -13,6 +13,7 @@
 from os import getenv
 from json import loads
 
+
 class ONSCloudFoundry(object):
     """
 
@@ -40,26 +41,38 @@ class ONSCloudFoundry(object):
         #
         vcap_application = loads(vcap_application)
         url = vcap_application.get('application_uris', [''])[0]
-        #self._env.host = url.split(':')[0]
 
         if self._env.get('flask_private', 'false').lower() not in ['yes', 'true']:
             self._env.flask_host = url.split(':')[0]
             self._env.flask_port = 443
             self._env.flask_protocol = 'https'
-            self._env.logger.info('Setting host to "{}" and port to "{}"'.format(self._env.api_host, self._env.api_port))
+            self.info('Setting host to "{}" and port to "{}"'.format(self._env.api_host, self._env.api_port))
         #
         #   Now get our database connection (if there is one)
         #
         vcap_services = getenv('VCAP_SERVICES')
+        vcap_services = loads(vcap_services)
         if not vcap_services:
             return self.log('Services: No services detected')
-        for areas in loads(vcap_services).values():
-            for service in areas:
+        for key, services in vcap_services.items():
+            if key == 'rds':
                 credentials = service.get('credentials', {})
                 self._env.set('db_connection', credentials.get('uri',''))
                 self._env.set('db_connection_name', service.get('name', ''))
-                self.info('DB Connection String: {}'.format(credentials['uri']))
-                self.info('DB Connection Name..: {}'.format(service['name']))
+                self.info('Detected service "{}"'.format(service.get('name', '')))
+
+            if key == 'rabbitmq':
+                for service in services:
+                    amqp = service.get('credentials', {}).get('protocols', {}).get('amqp', None)
+                    if amqp:
+                        self._env.rabbit.add_service({
+                            'host': amqp.get('host', 'no host'),
+                            'port': amqp.get('port', 'no port'),
+                            'username': amqp.get('username', 'no username'),
+                            'password': amqp.get('password', 'no password'),
+                            'name': service.get('name', 'no name')
+                        })
+                    self.info('Detected service "{}"'.format(service.get('name', '')))
 
     @property
     def detected(self):

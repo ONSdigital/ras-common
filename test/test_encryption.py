@@ -6,6 +6,7 @@ class TestStringMethods(unittest.TestCase):
 
     def setUp(self):
         ons_env.setup_ini()
+        ons_env.logger.activate()
         ons_env.cipher.activate()
         self.ons_cipher = ons_env.cipher
 

@@ -53,7 +53,7 @@ class ONSCloudFoundry(object):
         vcap_services = getenv('VCAP_SERVICES')
         vcap_services = loads(vcap_services)
         if not vcap_services:
-            return self.log('Services: No services detected')
+            return self.info('Services: No services detected')
         for key, services in vcap_services.items():
             if key == 'rds':
                 credentials = service.get('credentials', {})

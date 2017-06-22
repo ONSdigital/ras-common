@@ -10,6 +10,12 @@
 #   files, environment variables and anything else that pops up.
 #
 ##############################################################################
+from platform import system
+if system() == "Linux":
+    from twisted.internet import epollreactor
+    epollreactor.install()
+from twisted.internet import reactor
+from twisted.web import client
 from configparser import ConfigParser, ExtendedInterpolation
 from os import getenv
 from connexion import App
@@ -23,8 +29,10 @@ from .ons_jwt import ONSJwt
 from .ons_swagger import ONSSwagger
 from .ons_cryptographer import ONSCryptographer
 from .ons_registration import ONSRegistration
+from .ons_rabbit import ONSRabbit
 from socket import socket, AF_INET, SOCK_STREAM
 from pathlib import Path
+from os import getcwd
 
 class ONSEnvironment(object):
     """
@@ -39,11 +47,21 @@ class ONSEnvironment(object):
         self._jwt_secret = None
         self._port = None
         self._host = None
+        self._gateway = None
+        self._debug = None
+        self.api_protocol = None
+        self.api_host = None
+        self.api_port = None
+        self.flask_protocol = None
+        self.flask_host = None
+        self.flask_port = None
+
         self._config = ConfigParser()
         self._config._interpolation = ExtendedInterpolation()
         self._env = getenv('ONS_ENV', 'development')
         self._logger = ONSLogger(self)
         self._database = ONSDatabase(self)
+        self._rabbit = ONSRabbit(self)
         self._cloudfoundry = ONSCloudFoundry(self)
         self._swagger = ONSSwagger(self)
         self._jwt = ONSJwt(self)
@@ -53,9 +71,10 @@ class ONSEnvironment(object):
     def info(self, text):
         self.logger.info('[env] {}'.format(text))
 
-    def activate(self):
+    def setup(self):
         """
-        Start the ball rolling ...
+        Setup the various modules, we want to call this specifically from the test routines
+        as they won't want a running reactor for testing purposes ...
         """
         self.setup_ini()
         self._logger.activate()
@@ -64,7 +83,16 @@ class ONSEnvironment(object):
         self._swagger.activate()
         self._jwt.activate()
         self._cryptography.activate()
+        self._rabbit.activate()
+
+    def activate(self, callback=None):
+        """
+        Start the ball rolling ...
+        """
+        self.setup()
         self._registration.activate()
+        self.info('Acquired listening port "{}"'.format(self._port))
+
 
         if self.swagger.has_api:
             swagger_file = '{}/{}'.format(self.swagger.path, self.swagger.file)
@@ -72,19 +100,34 @@ class ONSEnvironment(object):
                 self.info('Unable to access swagger file "{}"'.format(swagger_file))
                 return
 
-            app = App(__name__, specification_dir='../{}'.format(self.swagger.path))
-            app.add_api(self.swagger.file, arguments={'title': self.ms_name})
+            swagger_ui = self.get('swagger_ui', 'ui')
+            app = App(__name__, specification_dir='{}/{}'.format(getcwd(), self.swagger.path))
+            app.add_api(self.swagger.file, arguments={'title': self.ms_name}, swagger_url=swagger_ui)
             CORS(app.app)
         else:
             app = Flask(__name__)
             CORS(app)
+
+        reactor.suggestThreadPoolSize(200)
+        client._HTTP11ClientFactory.noisy = False
+        if callback:
+            callback(app)
+
         Twisted(app).run(host='0.0.0.0', port=self.port)
 
     def setup_ini(self):
-        self._config.read(['local.ini', 'config.ini', '../config.ini'])
+        self._config.read(['local.ini', '../local.ini', 'config.ini', '../config.ini'])
         self._jwt_algorithm = self.get('jwt_algorithm')
         self._jwt_secret = self.get('jwt_secret')
-        self._port = getenv('PORT', self.get('port', self.get_free_port()))
+        self._port = self.get('port', getenv('PORT', self.get_free_port()))
+        #self._gateway = self.get('api_host')
+        self.api_host = self.get('api_host')
+        self.api_port = self.get('api_port')
+        self.api_protocol = self.get('api_protocol')
+        self.flask_host = self.get('flask_host')
+        self.flask_port = self.get('flask_port', self._port)
+        self.flask_protocol = self.get('flask_protocol')
+        self._debug = self.get('debug', False).lower() in ['yes', 'true']
 
     def get(self, attribute, default=None, section=None):
         """
@@ -97,12 +140,9 @@ class ONSEnvironment(object):
         """
         if not section:
             section = self._env
-        value = self._config['microservice'].get(attribute, None)
-        if value:
-            return value
-        if section in self._config:
-            return self._config[section].get(attribute, default)
-        return default
+        if section not in self._config:
+            return default
+        return self._config[section].get(attribute, default)
 
     def set(self, attribute, value):
         """
@@ -118,7 +158,6 @@ class ONSEnvironment(object):
         sock.bind(('localhost', 0))
         _, port = sock.getsockname()
         sock.close()
-        self.info('Acquired listening port "{}"'.format(port))
         return port
 
     @property
@@ -129,9 +168,26 @@ class ONSEnvironment(object):
     def port(self):
         return self._port
 
+    @port.setter
+    def port(self, value):
+        self._port = value
+
     @property
     def host(self):
         return self._host if self._host else 'localhost'
+
+    @host.setter
+    def host(self, value):
+        self._host = value
+
+    @property
+    def gateway(self):
+        #return self._gateway
+        return self.api_host
+
+    @property
+    def db(self):
+        return self._database
 
     @property
     def logger(self):
@@ -143,6 +199,10 @@ class ONSEnvironment(object):
 
     @property
     def crypt(self):
+        return self._cryptography
+
+    @property
+    def cipher(self):
         return self._cryptography
 
     @property
@@ -168,3 +228,68 @@ class ONSEnvironment(object):
     @property
     def ms_name(self):
         return "ONS Micro-Service"
+
+    @property
+    def is_secure(self):
+        return self.get('authentication', 'true').lower() in ['yes', 'true']
+
+    @property
+    def protocol(self):
+        #return self.get('api_protocol', 'http')
+        return self.api_protocol
+
+    @property
+    def api_protocol(self):
+        return self._api_protocol
+
+    @api_protocol.setter
+    def api_protocol(self, value):
+        self._api_protocol = value
+
+    @property
+    def api_host(self):
+        return self._api_host
+
+    @api_host.setter
+    def api_host(self, value):
+        self._api_host = value
+
+    @property
+    def api_port(self):
+        return self._api_port
+
+    @api_port.setter
+    def api_port(self, value):
+        self._api_port = value
+
+    @property
+    def flask_protocol(self):
+        return self._flask_protocol
+
+    @flask_protocol.setter
+    def flask_protocol(self, value):
+        self._flask_protocol = value
+
+    @property
+    def flask_host(self):
+        return self._flask_host
+
+    @flask_host.setter
+    def flask_host(self, value):
+        self._flask_host = value
+
+    @property
+    def flask_port(self):
+        return self._flask_port
+
+    @flask_port.setter
+    def flask_port(self, value):
+        self._flask_port = value
+
+    @property
+    def rabbit(self):
+        return self._rabbit
+
+    @property
+    def debug(self):
+        return self._debug

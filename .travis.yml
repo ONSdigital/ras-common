@@ -1,0 +1,13 @@
+language: python
+python:
+  - "3.6"
+install:
+  - pip install -r test-requirements.txt
+script:
+  - ONS_ENV=test PYTHONPATH="`pwd`:$PYTHONPATH" py.test --cov-report term-missing --cov-config=.coveragerc --cov=ons_ras_common/
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
+notifications:
+    slack: surveydatacollection:LCbNJJpDoY3gYIvLOlK0nZkV
+env:
+  - secure: axfmlBQI5kpDTinZpzPCJhMHEKIygxmDZWkUBvi1+pD3aYr+1snfJpvVxane7gl+GA+b7Gs8FuBn/9qM5q+IkHVoyQSsHuaPvm1es7487cfa7MoXx6EoZE5krGVW88GsTzufLgiNuEXyFb0sEX/M41WrENxS4HyzDladOBH1AjSv2HFzTrnVXUy0Zja/mMsVpjPCMi5oTh8nyh0IqF9zu52wT7vYAjS7EvtnauUUyJNM8gLraMp1R4f06kUclDW2lnq9TF3GREngV04RQ1aXmOtkhW69kCPUxjBRcOiHZYYedHzWsPL5tmFlUkMYqYJWo0NgY629ElWHvYKllY8B92a4rEq4Fnf32PpG8ge4gq8xctBIR2gxreFRSgp/5ZB1HWNwrUQRagiZ8KEmU44z4dIQ2SguD1pQY6fjxIaIzjbhbY3NL/qCQM83EMI5DqWLXbL4mtHtG76sbCi3kQjSleATEBb/r9EDkQp8GCojAm08/0zPlZfr8eTQcqiMj9KMCUrzAUewYxTMQ4BgeXiG1zLTWkCYMDSoYpE3R9JrosLwKVp7p467rP9LoJXDG/Z9ZhnJ5vW8IzRGliDsZ/jpzE7mj4uo3FTYZ0EgqrV9kuZn057E9Ov8f5RP/kX5RaJAIs0GrbnCSq7pLh4dUv68uOR7qe38clS9Mcx2E9oM3/M=

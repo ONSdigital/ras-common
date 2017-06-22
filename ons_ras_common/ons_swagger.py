@@ -40,16 +40,30 @@ class ONSSwagger(object):
 
         with open(self._swagger) as io:
             self._spec = load(io.read())
+#api_protocol = https
+#api_host = api-demo.apps.mvp.onsclofo.uk
+#api_port = 443
 
-        self.rewrite_host(self._env.get('api_gateway', 'localhost'))
+        self.rewrite_host(self._env.api_host, self._env.api_port)
+        #remote_ms = self._env.get('remote_ms', None)
+        #if remote_ms:
+        #    self.rewrite_host(remote_ms, 443)
+        #else:
+        #self.clear_host()
+        self.flush()
 
-    def rewrite_host(self, host):
+    def clear_host(self):
+        if self._has_api and 'host' in self._spec:
+            del self._spec['host']
+            self._changed = True
+
+    def rewrite_host(self, host, port):
         """
         Update the host component in the Swagger specification
         :param host: New host name
         """
         if self._has_api:
-            self._spec['host'] = host
+            self._spec['host'] = '{}:{}'.format(host, port)
             self._changed = True
 
     def flush(self):
@@ -85,10 +99,14 @@ class ONSSwagger(object):
         return self._spec.get('host', None)
 
     @property
+    def port(self):
+        return 443 if self._env.protocol == 'https' else self._env.port
+
+    @property
     def base(self):
         if not self._has_api:
             return ''
-        return self._spec.get('basePath', None)
+        return self._spec.get('basePath', '')
 
     @property
     def paths(self):

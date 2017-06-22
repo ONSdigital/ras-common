@@ -26,18 +26,31 @@ class ONSDatabase(object):
         self._base = declarative_base()
         self._session = scoped_session(sessionmaker())
 
-    def info(self, text):
-        self._env.logger.info('[db] {}'.format(text))
+    @property
+    def base(self):
+        return self._base
+
+    @property
+    def engine(self):
+        return self._engine
+
+    @property
+    def session(self):
+        return self._session
 
     def warn(self, text):
-        self._env.logger.warn('[db] [warning] {}'.format(text))
+        self._env.logger.warn(text, module=__name__)
+
+    def info(self, text):
+        self._env.logger.info(text, module=__name__)
 
     def activate(self):
+
         if self._env.get('enable_database', 'false').lower() not in ['true', 'yes']:
             return self.info('Database is NOT enabled [missing "enabled_database = true"]')
 
         if not self.check_paths():
-            return self.warn('[swagger_server/models_local/_models.py] file is missing')
+            return self.warn('[swagger_server/models/_models.py] file is missing')
 
         db_connection = self._env.get('db_connection')
         if not db_connection:
@@ -46,6 +59,7 @@ class ONSDatabase(object):
         self.info('Database connection is "{}"'.format(db_connection))
         self._engine = create_engine(db_connection, convert_unicode=True)
         self._session.remove()
+        self._session.configure(bind=self._engine, autoflush=False, autocommit=False, expire_on_commit=False)
         if self._env.drop_database:
             self.drop()
         self.create()
@@ -55,11 +69,11 @@ class ONSDatabase(object):
         Check our filesystem for required database files ...
         :return: True if database environment is available
         """
-        return Path('swagger_server/models_local/_models.py').is_file()
+        return Path('swagger_server/models/_models.py').is_file()
 
     def drop(self):
         self.info('Dropping any existing Database Tables')
-        from swagger_server.models_local import _models
+        from swagger_server.models import _models
         connection = self._env.get('db_connection')
         schema = self._env.get('db_schema')
         if connection.startswith('postgres'):
@@ -71,12 +85,12 @@ class ONSDatabase(object):
 
     def create(self):
         self.info('Creating any missing Database tables')
-        from swagger_server.models_local import _models
         connection = self._env.get('db_connection')
         schema = self._env.get('db_schema')
         if connection.startswith('postgres'):
             self.info('Creating Database schema "{}"'.format(schema))
             self._base.metadata.schema = schema
+        from swagger_server.models import _models
 
         if connection.startswith('postgres'):
             self.info("Creating schema {} if it does't exist".format(schema))

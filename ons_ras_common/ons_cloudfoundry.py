@@ -56,10 +56,11 @@ class ONSCloudFoundry(object):
             return self.info('Services: No services detected')
         for key, services in vcap_services.items():
             if key == 'rds':
-                credentials = service.get('credentials', {})
-                self._env.set('db_connection', credentials.get('uri',''))
-                self._env.set('db_connection_name', service.get('name', ''))
-                self.info('Detected service "{}"'.format(service.get('name', '')))
+                for service in services:
+                    credentials = service.get('credentials', {})
+                    self._env.set('db_connection', credentials.get('uri',''))
+                    self._env.set('db_connection_name', service.get('name', ''))
+                    self.info('Detected service "{}"'.format(service.get('name', '')))
 
             if key == 'rabbitmq':
                 for service in services:

@@ -113,6 +113,7 @@ class ONSRegistration(object):
                     'key': self._key,
                     'ui': path == ui
                 }
+                self.info("DEBUG :: {}".format(str(route)))
                 treq.post(api_register, data={'details': dumps(route)}).addCallback(registered)
 
             return True

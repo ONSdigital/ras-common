@@ -91,6 +91,8 @@ class ONSEnvironment(object):
         """
         self.setup()
         self._registration.activate()
+        self.info('Acquired listening port "{}"'.format(self._port))
+
 
         if self.swagger.has_api:
             swagger_file = '{}/{}'.format(self.swagger.path, self.swagger.file)
@@ -156,7 +158,6 @@ class ONSEnvironment(object):
         sock.bind(('localhost', 0))
         _, port = sock.getsockname()
         sock.close()
-        self.info('Acquired listening port "{}"'.format(port))
         return port
 
     @property

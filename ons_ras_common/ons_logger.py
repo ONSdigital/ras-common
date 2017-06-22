@@ -29,14 +29,15 @@ class ONSLogger(object):
     """
     def __init__(self, env):
         self._env = env
+        self._log_format = 'json'
+        self._ident = None
 
     def activate(self):
         """
         Activate the logging systems ...
         """
-        log_level = self._env.get('log_level', 'INFO')
         self._ident = self._env.get('my_ident', __name__, 'microservice')
-        self._log_format = self._env.get('log_format')
+        self._log_format = self._env.get('log_format', 'json')
         if self._log_format == 'text':
             self.logger = logging.getLogger(__name__)
         else:
@@ -45,7 +46,7 @@ class ONSLogger(object):
         logging.basicConfig(
             format="%(message)s",
             stream=sys.stdout,
-            level=LEVELS.get(log_level.lower(), logging.INFO)
+            level=LEVELS.get(self._env.get('log_level', 'INFO').lower(), logging.INFO)
         )
 
         def add_service_name(logger, method_name, event_dict):  # pylint: disable=unused-argument

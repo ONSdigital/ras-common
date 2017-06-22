@@ -7,6 +7,7 @@ class TestStringMethods(unittest.TestCase):
 
     def setUp(self):
         ons_env.setup_ini()
+        ons_env.logger.activate()
         ons_env._jwt.activate()
         self.ons_token = ons_env.jwt
         self.now = datetime.now()

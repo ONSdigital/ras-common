@@ -36,7 +36,7 @@ def validate_jwt(scope, request):
     return authorization_required_decorator
 
 
-def __bind_request_detail_to_log(request):
+def _bind_request_detail_to_log(request):
     """
     Set up logging details for a request logger
 
@@ -48,7 +48,6 @@ def __bind_request_detail_to_log(request):
         method=request.method,
         path=request.full_path
     )
-    ons_env.logger.info("Start request")
 
 
 def before_request(request):
@@ -61,7 +60,8 @@ def before_request(request):
     def before_request_decorator(original_function):
         @wraps(original_function)
         def before_request_wrapper(*args, **kwargs):
-            __bind_request_detail_to_log(request)
+            if ons_env.logger.is_json:
+                _bind_request_detail_to_log(request)
             return original_function(*args, **kwargs)
         return before_request_wrapper
     return before_request_decorator

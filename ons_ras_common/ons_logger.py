@@ -49,6 +49,8 @@ class ONSLogger(object):
             level=LEVELS.get(self._env.get('log_level', 'INFO').lower(), logging.INFO)
         )
 
+        self._is_json = self._log_format == 'json'
+
         def add_service_name(logger, method_name, event_dict):  # pylint: disable=unused-argument
             """
             Add the service name to the event dict.
@@ -107,6 +109,10 @@ class ONSLogger(object):
             self.logger.critical('{} {}'.format(datetime.datetime.now().isoformat(), text))
         else:
             self.logger.critical(*args, **kwargs)
+
+    @property
+    def is_json(self):
+        return self._is_json
 
 #    from sys import _getframe
 #    from logging import WARN, INFO, ERROR

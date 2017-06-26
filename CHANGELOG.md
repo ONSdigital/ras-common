@@ -1,3 +1,9 @@
+### Version 0.1.90
+* Before binding log context, check whether output is for JSON
+
+### Version 0.1.89
+* Add log handling for HTTP requests
+
 ### Version 0.1.82
 
 [Massive amount of refactoring and integration]

@@ -110,6 +110,13 @@ class ONSLogger(object):
         else:
             self.logger.critical(*args, **kwargs)
 
+    def exception(self, *args, **kwargs):
+        if self._log_format == 'text':
+            text = '{} {}'.format(str(args).strip('()').strip(',').strip("'"), str(kwargs))
+            self.logger.exception('{} {}'.format(datetime.datetime.now().isoformat(), text))
+        else:
+            self.logger.exception(*args, **kwargs)
+
     @property
     def is_json(self):
         return self._is_json

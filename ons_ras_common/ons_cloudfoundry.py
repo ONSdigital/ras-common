@@ -71,6 +71,7 @@ class ONSCloudFoundry(object):
                             'port': amqp.get('port', 'no port'),
                             'username': amqp.get('username', 'no username'),
                             'password': amqp.get('password', 'no password'),
+                            'vhost': amqp.get('vhost', 'no vhost'),
                             'name': service.get('name', 'no name')
                         })
                     self.info('Detected service "{}"'.format(service.get('name', '')))

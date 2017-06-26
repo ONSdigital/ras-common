@@ -37,7 +37,7 @@ class ONSRabbit(object):
                 'port': self._env.get('rabbit_port', None),
                 'username': self._env.get('rabbit_username', None),
                 'password': self._env.get('rabbit_password', None),
-                'vhost': self._env.get('rabbit_password', None)
+                'vhost': self._env.get('rabbit_vhost', None)
             })
         if not len(self._queues):
             self.info('No Rabbit queues detected')

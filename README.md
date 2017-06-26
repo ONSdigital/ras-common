@@ -95,8 +95,8 @@ implementations to specific versions of this library.
 
   This is a wrapper for RabbitMQ connections and works with the Cloud Foundry module to detect whether there is a
   Rabbit Queue available, and if there is, makes the credentials available as properties. i.e. if you have a queue
-  installed you should have **onv_env.rabbit.**{*host,port,name,username,password*}. Alternatively you can put
-  local defaults in your config.ini using **rabbit_**{*host,port,name,username,password*}. See the **development**
+  installed you should have **onv_env.rabbit.**{*host,port,name,username,password,vhost*}. Alternatively you can put
+  local defaults in your config.ini using **rabbit_**{*host,port,name,username,password,vhost*}. See the **development**
   section in this repo's config.ini for an example.
 
 #### How to use this code

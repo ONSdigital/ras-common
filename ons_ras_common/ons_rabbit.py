@@ -87,4 +87,4 @@ class ONSRabbit(object):
     @property
     def vhost(self):
         key = list(self._queues.keys())[0]
-        return self._queues[key].password
+        return self._queues[key].vhost

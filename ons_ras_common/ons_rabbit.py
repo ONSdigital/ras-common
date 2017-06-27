@@ -15,7 +15,7 @@ class RabbitQueue(object):
         self.port = queue['port']
         self.username = queue['username']
         self.password = queue['password']
-
+        self.vhost = queue['vhost']
 
 class ONSRabbit(object):
 

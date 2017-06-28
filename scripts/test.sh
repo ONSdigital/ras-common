@@ -5,4 +5,4 @@ if ! [ -a .build-test ] ; then
 fi
 source .build-test/bin/activate
 pip3 -q install -r test-requirements.txt
-ONS_ENV=test PYTHONPATH="`pwd`:$PYTHONPATH" py.test --cov-report term-missing --cov-config=.coveragerc --cov=ons_ras_common/
+ONS_ENV=travis pytest --cov-report term-missing --cov-config=.coveragerc --cov=ons_ras_common/ 

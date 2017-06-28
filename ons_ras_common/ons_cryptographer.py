@@ -34,6 +34,9 @@ class ONSCryptographer:
         """
         key = getenv('ONS_CRYPTOKEY', self._env.get('crypto_key', 'NO_KEY'))
         self.debug('Setting crypto key to "{}"'.format(key))
+        print('Setting crypto key to "{}"'.format(key))
+        import os
+        print("cwd>",os.getcwd())
         self._key = sha256(key.encode('utf-8')).digest()
 
     def pad(self, data):

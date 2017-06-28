@@ -58,6 +58,7 @@ class ONSEnvironment(object):
 
         self._config = ConfigParser()
         self._config._interpolation = ExtendedInterpolation()
+
         self._env = getenv('ONS_ENV', 'development')
         self._logger = ONSLogger(self)
         self._database = ONSDatabase(self)

@@ -167,7 +167,7 @@ class ONSEnvironment(object):
 
     @property
     def port(self):
-        return self._port
+        return int(self._port)
 
     @port.setter
     def port(self, value):

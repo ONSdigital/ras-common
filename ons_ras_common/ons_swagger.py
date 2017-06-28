@@ -41,14 +41,14 @@ class ONSSwagger(object):
         with open(self._swagger) as io:
             self._spec = load(io.read())
 
-        remote_ms = self._env.get('remote_ms', None)
-        if remote_ms:
-            port = int(self._env.api_port)
-            port = 80 if port == 443 else port
-            self._env.logger.info('[swagger] Setting PORT to {}'.format(port))
-            self.rewrite_host(self._env.api_host, port)
-        else:
-            self.rewrite_host(self._env.api_host, self._env.api_port)
+        #remote_ms = self._env.get('remote_ms', None)
+        #if remote_ms:
+        port = int(self._env.api_port)
+        port = 80 if port == 443 else port
+        self.info('[swagger] Setting PORT to {}'.format(port))
+        self.rewrite_host(self._env.api_host, port)
+        #else:
+        #    self.rewrite_host(self._env.api_host, self._env.api_port)
         self.flush()
 
     def clear_host(self):

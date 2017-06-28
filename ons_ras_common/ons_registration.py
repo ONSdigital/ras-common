@@ -132,10 +132,10 @@ class ONSRegistration(object):
                 self._env.api_port,
                 self._key
             )
-            self.info('********* PING: {}'.format(api_ping))
+
             def status_check(response):
                 if response.code == 204:
-                    self.error('200 - REGISTER')
+                    self.info('204 - Registering new routes')
                     self.register_routes()
                 elif response.code != 200:
                     self.error('{} - UNKNOWN ERROR'.format(response.code))

@@ -127,7 +127,7 @@ class ONSEnvironment(object):
         self.flask_host = self.get('flask_host')
         self.flask_port = self.get('flask_port', self._port)
         self.flask_protocol = self.get('flask_protocol')
-        self._debug = self.get('debug', False).lower() in ['yes', 'true']
+        self._debug = self.get('debug', 'False').lower() in ['yes', 'true']
 
     def get(self, attribute, default=None, section=None):
         """

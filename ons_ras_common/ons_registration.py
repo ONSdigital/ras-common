@@ -93,6 +93,7 @@ class ONSRegistration(object):
                         'port': self._env.flask_port,
                     }
                 route = dict(route, **{'uri': uri, 'key': self._key})
+                self._env.logger('Route> {}'.format(str(route)))
                 treq.post(api_register, data={'details': dumps(route)}).addCallback(registered)
 
             swagger_paths = ['/ui/css', '/ui/lib', '/ui/images', '/swagger.json']

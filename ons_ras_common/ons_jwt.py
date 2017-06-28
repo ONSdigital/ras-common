@@ -24,9 +24,6 @@ class ONSJwt(object):
         self._algorithm = self._env.get('jwt_algorithm', None)
         self._secret = self._env.get('jwt_secret', None)
 
-        print("ALGORITHM: ", self.algorithm)
-        print("SECRET: ", self.secret)
-
     def debug(self, text):
         self._env.logger.debug('[jwt] {}'.format(text))
 

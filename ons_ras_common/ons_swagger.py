@@ -43,7 +43,7 @@ class ONSSwagger(object):
 
         remote_ms = self._env.get('remote_ms', None)
         if remote_ms:
-            self.rewrite_host(self._env.api_host, 80)
+            self.rewrite_host(self._env.api_host, self._env.api_port)
         else:
             self.rewrite_host(self._env.api_host, self._env.api_port)
         self.flush()

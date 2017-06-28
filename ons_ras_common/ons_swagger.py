@@ -41,7 +41,11 @@ class ONSSwagger(object):
         with open(self._swagger) as io:
             self._spec = load(io.read())
 
-        self.rewrite_host(self._env.api_host, self._env.api_port)
+        remote_ms = self._env.get('remote_ms', None)
+        if remote_ms:
+            self.rewrite_host(remote_ms, 443)
+        else:
+            self.rewrite_host(self._env.api_host, self._env.api_port)
         self.flush()
 
     def clear_host(self):

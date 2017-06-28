@@ -111,7 +111,8 @@ class ONSRegistration(object):
                     'port': self._env.flask_port,
                     'uri': uri,
                     'key': self._key,
-                    'ui': path == ui
+                    'ui': path == ui,
+                    'name': self._env.get('my_name', 'no local name', 'microservice')
                 }
                 treq.post(api_register, data={'details': dumps(route)}).addCallback(registered)
 

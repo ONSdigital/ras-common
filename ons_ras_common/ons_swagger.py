@@ -43,7 +43,9 @@ class ONSSwagger(object):
 
         remote_ms = self._env.get('remote_ms', None)
         if remote_ms:
-            self.rewrite_host(self._env.api_host, 80 if self._env.api_port == 443 else self._env.api_port)
+            port = 80 if self._env.api_port == 443 else self._env.api_port
+            self._env.logger.info('[swagger] Setting PORT to {}'.format(port))
+            self.rewrite_host(self._env.api_host, port)
         else:
             self.rewrite_host(self._env.api_host, self._env.api_port)
         self.flush()

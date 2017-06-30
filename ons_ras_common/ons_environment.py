@@ -116,8 +116,6 @@ class ONSEnvironment(object):
 
         @app.app.teardown_appcontext
         def flush_session_manager(exception):
-            self.logger.info('Clearing session manager')
-            self.logger.info(exception)
             self.db.session.remove()
 
         Twisted(app).run(host='0.0.0.0', port=self.port)

@@ -110,4 +110,4 @@ class ONSDatabase(object):
             session.rollback()
             raise
         finally:
-            session.remove()
+            session.close()

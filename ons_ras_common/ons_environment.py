@@ -10,10 +10,12 @@
 #   files, environment variables and anything else that pops up.
 #
 ##############################################################################
-from platform import system
-if system() == "Linux":
-    from twisted.internet import epollreactor
-    epollreactor.install()
+#from platform import system
+from crochet import no_setup
+no_setup()
+#if system() == "Linux":
+#    from twisted.internet import epollreactor
+#    epollreactor.install()
 from twisted.internet import reactor
 from twisted.web import client
 from configparser import ConfigParser, ExtendedInterpolation
@@ -34,6 +36,8 @@ from .ons_case import ONSCase
 from socket import socket, AF_INET, SOCK_STREAM
 from pathlib import Path
 from os import getcwd
+
+
 
 class ONSEnvironment(object):
     """

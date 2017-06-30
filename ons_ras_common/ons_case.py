@@ -9,18 +9,18 @@
 #   ONSCase wraps routines used to access the case service
 #
 ##############################################################################
-from crochet import wait_for, no_setup
+from crochet import wait_for, run_in_reactor
 from json import loads
-from uuid import UUID
 import treq
-from twisted.internet import reactor
 from twisted.internet.error import UserError
-no_setup()
+
+
 
 class ONSCase(object):
 
     def __init__(self, env):
         self._env = env
+        self._categories = None
 
     def activate(self):
         pass
@@ -28,53 +28,65 @@ class ONSCase(object):
     def error(self, text):
         self._env.logger.error('[case] {}'.format(text))
 
+    def warn(self, text):
+        self._env.logger.warn('[case] {}'.format(text))
+
     def info(self, text):
         self._env.logger.info('[case] {}'.format(text))
 
-    @wait_for(timeout=5)
+    def hit_route(self, params):
+
+        self.info('Params={}'.format(params))
+
+        def status_check(response):
+            if response.code != 200:
+                self.error('Response code = {}'.format(response.code))
+                raise UserError(url)
+            return response
+
+        def json(response):
+            return loads(response.decode())
+
+        url = '{protocol}://{host}:{port}{endpoint}'.format(**params)
+        return treq.get(url).addCallback(status_check).addCallback(treq.content).addCallback(json)
+
+    @run_in_reactor
     def _lookup_categories(self):
 
-        def hit_route(params):
-
-            self.info('Params={}'.format(params))
-
-            def status_check(response):
-                if response.code != 200:
-                    self.error('Response code = {}'.format(response.code))
-                    raise UserError(url)
-                return response
-
-            def json(response):
-                categories = loads(response.decode())
-                return categories
-
-            url = '{protocol}://{host}:{port}{endpoint}'.format(**params)
-            #url='http://ras-api-gateway-int.apps.mvp.onsclofo.uk:80/categories'
-            self.info("URL={}".format(url))
-            deferred = treq.request(method="GET", url=url)
-            return deferred
-#            return deferred.addCallback(status_check).addCallback(treq.content).addCallback(json)
-
-        params = {
+        return self.hit_route({
             'endpoint': '/categories',
             'protocol': self._env.api_protocol,
             'host': self._env.api_host,
             'port': self._env.api_port
-        }
-        return hit_route(params)
-
+        })
 
     def post(self, *args, description=None, category=None, party_id=None, created_by=None, payload=None):
 
-        try:
-            print(self._lookup_categories())
-        except Exception as e:
-            print(str(e))
-            return False
         if not (description and category and party_id and created_by):
             self.error('insufficient arguments: description={} category={} party_id={} created_by={}'.format(
                 description, category, party_id, created_by
             ))
+            return False
+
+        if not self._categories:
+            try:
+                categories = self._lookup_categories().wait(2)
+            except Exception as e:
+                self.error('error looking up categories "{}"'.format(str(e)))
+                return False
+
+            self._categories = {}
+            for cat in categories:
+                action = cat.get('name')
+                if action:
+                    self._categories[action] = cat
+                else:
+                    self.warn('received unknown category "{}"'.format(str(cat)))
+
+            print(self._categories)
+
+        if category not in self._categories:
+            self.error('invalid category code "{}"'.format(category))
             return False
 
         message = {
@@ -86,7 +98,7 @@ class ONSCase(object):
         if payload:
             message = dict(message, **payload)
 
-        print(message)
+        print(">>",  message)
         return True
     #
     #   POST /cases/<caseid>/events

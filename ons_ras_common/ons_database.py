@@ -59,7 +59,7 @@ class ONSDatabase(object):
         self.info('Database connection is "{}"'.format(db_connection))
         self._engine = create_engine(db_connection, convert_unicode=True)
         self._session.remove()
-        self._session.configure(bind=self._engine, autoflush=False, autocommit=False, expire_on_commit=False)
+        self._session.configure(bind=self._engine, autoflush=True, autocommit=False, expire_on_commit=True)
         if self._env.drop_database:
             self.drop()
         self.create()

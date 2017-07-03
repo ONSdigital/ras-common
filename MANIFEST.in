@@ -7,3 +7,5 @@ include skeleton.py
 include runtime.txt
 include Procfile
 include requirements.txt
+include CHANGELOG.md
+include README.rst

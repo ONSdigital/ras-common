@@ -1,0 +1,10 @@
+coverage:
+  status:
+    project:
+      default:
+        target: 50%
+        threshold: null
+        base: auto
+        if_not_found: success
+
+comment: false

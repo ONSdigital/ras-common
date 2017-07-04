@@ -14,7 +14,7 @@ class Skeleton(object):
     @staticmethod
     def hello_world():
         case_id = 'ab548d78-c2f1-400f-9899-79d944b87300'
-        exercise_id = ''
+        exercise_id = '14fb3e68-4dca-46db-bf49-04b84e07e77c'
         #code, msg = ons_env.case_service.post_event(case_id,
         #    category='COLLECTION_INSTRUMENT_DOWNLOADED',
         #    created_by='ME',
@@ -25,6 +25,5 @@ class Skeleton(object):
 
         #code, msg = ons_env.case_service.get_by_id(case_id)
         code, msg = ons_env.exercise_service.get_by_id(exercise_id)
-
         return make_response(jsonify(msg), code)
 

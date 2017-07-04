@@ -10,7 +10,7 @@ paths:
       responses:
         200: {description: status supplied}
         500: {description: server error}
-      x-swagger-router-controller: skeleton.skeleton
+      x-swagger-router-controller: skeleton.Skeleton
 produces: [application/json]
 schemes: [http, https]
 swagger: '2.0'

@@ -79,6 +79,7 @@ class ONSLogger(object):
             self.logger.info('{} {}'.format(datetime.datetime.now().isoformat(), text))
         else:
             self.logger.info(*args, **kwargs)
+        return False
 
     def debug(self, *args, **kwargs):
         if self._log_format == 'text':
@@ -86,6 +87,7 @@ class ONSLogger(object):
             self.logger.debug('{} {}'.format(datetime.datetime.now().isoformat(), text))
         else:
             self.logger.debug(*args, **kwargs)
+        return False
 
     def warn(self, *args, **kwargs):
         if self._log_format == 'text':
@@ -93,6 +95,7 @@ class ONSLogger(object):
             self.logger.warning('{} {}'.format(datetime.datetime.now().isoformat(), text))
         else:
             self.logger.warning(*args, **kwargs)
+        return False
 
     def error(self, *args, **kwargs):
         if self._log_format == 'text':
@@ -100,6 +103,7 @@ class ONSLogger(object):
             self.logger.error('{} {}'.format(datetime.datetime.now().isoformat(), text))
         else:
             self.logger.error(*args, **kwargs)
+        return False
 
     def critical(self, *args, **kwargs):
         if self._log_format == 'text':
@@ -107,6 +111,7 @@ class ONSLogger(object):
             self.logger.critical('{} {}'.format(datetime.datetime.now().isoformat(), text))
         else:
             self.logger.critical(*args, **kwargs)
+        return False
 
 #    from sys import _getframe
 #    from logging import WARN, INFO, ERROR

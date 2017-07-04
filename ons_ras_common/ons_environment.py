@@ -32,7 +32,9 @@ from .ons_swagger import ONSSwagger
 from .ons_cryptographer import ONSCryptographer
 from .ons_registration import ONSRegistration
 from .ons_rabbit import ONSRabbit
-from .ons_case import ONSCase
+from .ons_asyncio import ONSAsyncIO
+from .ons_rest_case import ONSCase
+from .ons_rest_exercise import ONSExercise
 from socket import socket, AF_INET, SOCK_STREAM
 from pathlib import Path
 from os import getcwd
@@ -73,7 +75,9 @@ class ONSEnvironment(object):
         self._jwt = ONSJwt(self)
         self._cryptography = ONSCryptographer(self)
         self._registration = ONSRegistration(self)
+        self._asyncio = ONSAsyncIO(self)
         self._case = ONSCase(self)
+        self._exercise = ONSExercise(self)
 
     def info(self, text):
         self.logger.info('[env] {}'.format(text))
@@ -91,7 +95,9 @@ class ONSEnvironment(object):
         self._jwt.activate()
         self._cryptography.activate()
         self._rabbit.activate()
+        self._asyncio.activate()
         self._case.activate()
+        self._exercise.activate()
 
     def activate(self, callback=None):
         """
@@ -301,3 +307,15 @@ class ONSEnvironment(object):
     @property
     def debug(self):
         return self._debug
+
+    @property
+    def asyncio(self):
+        return self._asyncio
+
+    @property
+    def case_service(self):
+        return self._case
+
+    @property
+    def exercise_service(self):
+        return self._exercise

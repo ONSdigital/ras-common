@@ -96,10 +96,9 @@ class ONSRegistration(object):
                 #self._env.logger.info('Route> {}'.format(str(route)))
                 treq.post(api_register, data={'details': dumps(route)}).addCallback(registered)
 
-            #swagger_paths = ['/ui/css', '/ui/lib', '/ui/images', '/swagger.json']
+            swagger_paths = ['/ui/css', '/ui/lib', '/ui/images', '/swagger.json']
             ui = '/' + self._env.get('swagger_ui', 'ui')+'/'
-            swagger_paths = [ui]
-            #swagger_paths.append(ui)
+            swagger_paths.append(ui)
 
             for path in swagger_paths:
                 uri = self._env.swagger.base

@@ -93,12 +93,13 @@ class ONSRegistration(object):
                         'port': self._env.flask_port,
                     }
                 route = dict(route, **{'uri': uri, 'key': self._key})
-                self._env.logger.info('Route> {}'.format(str(route)))
+                #self._env.logger.info('Route> {}'.format(str(route)))
                 treq.post(api_register, data={'details': dumps(route)}).addCallback(registered)
 
-            swagger_paths = ['/ui/css', '/ui/lib', '/ui/images', '/swagger.json']
+            #swagger_paths = ['/ui/css', '/ui/lib', '/ui/images', '/swagger.json']
             ui = '/' + self._env.get('swagger_ui', 'ui')+'/'
-            swagger_paths.append(ui)
+            swagger_paths = [ui]
+            #swagger_paths.append(ui)
 
             for path in swagger_paths:
                 uri = self._env.swagger.base
@@ -134,7 +135,7 @@ class ONSRegistration(object):
                 self._key
             )
 
-            def status_check(response):
+            def check(response):
                 if response.code == 204:
                     self.info('204 - Registering new routes')
                     self.register_routes()
@@ -142,7 +143,14 @@ class ONSRegistration(object):
                     self.error('{} - UNKNOWN ERROR'.format(response.code))
                 return response
 
-            treq.get(api_ping).addCallback(status_check)
+            def log(failure):
+                """
+                Just log the error, a return code of 'False' will be returned elsewhere
+                :param failure: A treq failure object
+                """
+                return self._env.logger.error('[ping-error] {}'.format(failure.getErrorMessage()))
+
+            treq.get(api_ping).addCallback(check).addErrback(log)
 
         except requests.exceptions.ConnectionError as e:
             self.log('ping failed for "{}"'.format(api_ping))

@@ -1,0 +1,3 @@
+
+class RasError(Exception):
+    pass

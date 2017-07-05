@@ -46,14 +46,13 @@ class ONSJwt(object):
         """
         return decode(token, self._secret, algorithms=[self._algorithm])
 
-    def validate(self, scope, jwt_token, extra=None):
+    def validate(self, scope, jwt_token):
         """
         This function checks a jwt token for a required scope type.
         :param scope: The scopes to test against
         :param jwt_token: The incoming request object
         :return: Token is value, True or False
         """
-        self.warn('validating token "{}" for scope "{}" extra "{}"'.format(jwt_token, scope, extra))
         try:
             token = self.decode(jwt_token)
         except JWTError:

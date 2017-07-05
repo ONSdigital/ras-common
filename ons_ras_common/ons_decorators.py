@@ -31,7 +31,7 @@ def validate_jwt(scope, request, on_error=None):
             if not ons_env.is_secure:
                 return original_function(*args, **kwargs)
 
-            if ons_env.jwt.validate(scope, request.headers.get('authorization', ''), request):
+            if ons_env.jwt.validate(scope, request.headers.get('authorization', '')):
                 return original_function(*args, **kwargs)
 
             if not on_error:

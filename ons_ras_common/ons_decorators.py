@@ -34,6 +34,7 @@ def validate_jwt(scope, request, on_error=None):
             print("1=", scope)
             print("2=", request.headers.get('authorization', ''))
             print("3=", request)
+            print("4=", on_error.get('error'))
 #            if ons_env.jwt.validate(scope, request.headers.get('authorization', ''), request):
 #                return original_function(*args, **kwargs)
 

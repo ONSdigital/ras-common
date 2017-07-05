@@ -99,7 +99,7 @@ class ONSEnvironment(object):
         self._case.activate()
         self._exercise.activate()
 
-    def activate(self, callback=None):
+    def activate(self, callback=None, app=None):
         """
         Start the ball rolling ...
         """
@@ -119,8 +119,9 @@ class ONSEnvironment(object):
             app.add_api(self.swagger.file, arguments={'title': self.ms_name}, swagger_url=swagger_ui)
             CORS(app.app)
         else:
-            app = Flask(__name__)
-            CORS(app)
+            if not app:
+                app = Flask(__name__)
+                CORS(app)
 
         reactor.suggestThreadPoolSize(200)
         client._HTTP11ClientFactory.noisy = False

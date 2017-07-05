@@ -53,7 +53,7 @@ class ONSJwt(object):
         :param jwt_token: The incoming request object
         :return: Token is value, True or False
         """
-        self.debug('validating token "{}" for scope "{}" extra "{}"'.format(jwt_token, scope, extra))
+        self.warn('validating token "{}" for scope "{}" extra "{}"'.format(jwt_token, scope, extra))
         try:
             token = self.decode(jwt_token)
         except JWTError:

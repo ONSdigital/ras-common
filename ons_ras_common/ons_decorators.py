@@ -13,14 +13,16 @@
 ##############################################################################
 from . import ons_env
 from functools import wraps
+from flask import render_template
 
 
-def validate_jwt(scope, request):
+def validate_jwt(scope, request, on_error=None):
     """
     Validate the incoming JWT token, don't allow access to the endpoint unless we pass this test
 
     :param scope: A list of scope identifiers used to protect the endpoint
     :param request: The incoming request object
+    :param on_error: The error structure
     :return: Exit variables from the protected function
     """
     def authorization_required_decorator(original_function):
@@ -30,6 +32,11 @@ def validate_jwt(scope, request):
                 return original_function(*args, **kwargs)
             if ons_env.jwt.validate(scope, request.headers.get('authorization', ''), request):
                 return original_function(*args, **kwargs)
-            return "Access forbidden", 403
+
+            if not on_error:
+                return "Access forbidden", 403
+
+            return render_template(on_error.get('file'), _theme='default', data=on_error.get('error'))
+
         return authorization_required_wrapper
     return authorization_required_decorator

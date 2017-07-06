@@ -107,18 +107,19 @@ class ONSEnvironment(object):
         self._registration.activate()
         self.info('Acquired listening port "{}"'.format(self._port))
 
-
         if self.swagger.has_api:
             swagger_file = '{}/{}'.format(self.swagger.path, self.swagger.file)
             if not Path(swagger_file).is_file():
                 self.info('Unable to access swagger file "{}"'.format(swagger_file))
                 return
 
+
+            print("111")
             swagger_ui = self.get('swagger_ui', 'ui')
             app = App(__name__, specification_dir='{}/{}'.format(getcwd(), self.swagger.path))
             app.add_api(self.swagger.file, arguments={'title': self.ms_name}, swagger_url=swagger_ui)
             CORS(app.app)
-
+            print("2222")
             @app.app.teardown_appcontext
             def flush_session_manager(exception):
                 self.db.session.remove()
@@ -133,6 +134,7 @@ class ONSEnvironment(object):
                 self.logger.info("Flush")
                 self.db.session.remove()
 
+        print("333")
         reactor.suggestThreadPoolSize(200)
         client._HTTP11ClientFactory.noisy = False
         if callback:

@@ -128,6 +128,7 @@ class ONSEnvironment(object):
         if callback:
             callback(app)
 
+        self.logger.info("Running ...")
         Twisted(app).run(host='0.0.0.0', port=self.port)
 
     def setup_ini(self):

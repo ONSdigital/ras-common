@@ -109,7 +109,7 @@ class ONSAsyncIO(object):
             """
             msg = yield response.text()
             msg = loads(msg)
-            if response.code != 200:
+            if response.code > 299:
                 self._env.logger.error('[case] Failed to post event', code=response.code, reason=str(msg))
             return response.code, msg
 

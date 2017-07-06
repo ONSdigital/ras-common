@@ -106,13 +106,13 @@ class ONSEnvironment(object):
         self.setup()
         self._registration.activate()
         self.info('Acquired listening port "{}"'.format(self._port))
-
+        print("@@@")
         if self.swagger.has_api:
+            print("000")
             swagger_file = '{}/{}'.format(self.swagger.path, self.swagger.file)
             if not Path(swagger_file).is_file():
                 self.info('Unable to access swagger file "{}"'.format(swagger_file))
                 return
-
 
             print("111")
             swagger_ui = self.get('swagger_ui', 'ui')

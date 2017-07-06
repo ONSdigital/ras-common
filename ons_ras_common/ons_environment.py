@@ -118,16 +118,27 @@ class ONSEnvironment(object):
             app = App(__name__, specification_dir='{}/{}'.format(getcwd(), self.swagger.path))
             app.add_api(self.swagger.file, arguments={'title': self.ms_name}, swagger_url=swagger_ui)
             CORS(app.app)
+
+            @app.app.teardown_appcontext
+            def flush_session_manager(exception):
+                self.db.session.remove()
+
         else:
             if not app:
                 app = Flask(__name__)
                 CORS(app)
+
+            @app.teardown_appcontext
+            def flush_session_manager(exception):
+                self.logger.info("Flush")
+                self.db.session.remove()
 
         reactor.suggestThreadPoolSize(200)
         client._HTTP11ClientFactory.noisy = False
         if callback:
             callback(app)
 
+        self.logger.info("**** LAUNCH ****")
         Twisted(app).run(host='0.0.0.0', port=self.port)
 
     def setup_ini(self):

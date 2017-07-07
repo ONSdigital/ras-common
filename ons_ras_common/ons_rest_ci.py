@@ -32,6 +32,7 @@ class ONSCollectionInstrument(object):
         :param instrument_id: The id of the exercise in question
         :return: An instrument record
         """
+        print("@@@@@=", self._get.format(instrument_id))
         instrument = self._env.asyncio.access_endpoint(self._get.format(instrument_id))
         if not instrument:
             return 404, {'code': 404, 'text': 'unable to find instrument for this instrument_id'}

@@ -127,7 +127,7 @@ class ONSAsyncIO(object):
         :param endpoint: The endpoint we're going to hit relative to the API base (/)
         :return: A valid result as a python dict, or False in the case of an error
         """
-        self._env.logger.debug('[endpoint] {}'.format(endpoint))
+        self._env.logger.info('[endpoint] {}'.format(endpoint))
         try:
             result = self.get_route(endpoint).wait(DEFAULT_TIMEOUT)
         except crochet.TimeoutError:

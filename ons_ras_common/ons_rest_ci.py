@@ -37,4 +37,4 @@ class ONSCollectionInstrument(object):
         if not instrument:
             return 404, {'code': 404, 'text': 'unable to find instrument for this instrument_id'}
 
-        return 200, {'code': 200, 'case': instrument}
+        return 200, {'code': 200, 'instrument': instrument}

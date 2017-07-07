@@ -19,7 +19,7 @@ here = path.abspath(path.dirname(__file__))
 with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = f.read()
 
-__version__ = '0.1.114'
+__version__ = '0.2.0'
 
 setup(
     name='ons_ras_common',
@@ -84,15 +84,4 @@ setup(
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=[str(ir.req) for ir in install_reqs],
-
-    # Although 'package_data' is the preferred approach, in some case you may
-    # need to place data files outside of your packages. See:
-    # http://docs.python.org/3.4/distutils/setupscript.html#installing-additional-files # noqa
-    # In this case, 'data_file' will be installed into '<sys.prefix>/my_data'
-    package_data={
-        'samples': ['config.ini', 'local.ini', 'main.py', ' swagger.yaml', 'Procfile', 'runtime.txt']
-    },
-    entry_points={
-        'console_scripts': ['ons_ras_common=ons_ras_common.ons_tool:main'],
-    },
 )

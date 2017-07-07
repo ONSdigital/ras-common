@@ -7,5 +7,12 @@ include skeleton.py
 include runtime.txt
 include Procfile
 include requirements.txt
-include CHANGELOG.md
 include README.rst
+include *.md
+include *.txt
+include *.yaml
+include .coveragerc
+include LICENSE
+include Makefile
+recursive-include scripts *.sh
+recursive-include test *.py

@@ -35,6 +35,7 @@ from .ons_rabbit import ONSRabbit
 from .ons_asyncio import ONSAsyncIO
 from .ons_rest_case import ONSCase
 from .ons_rest_exercise import ONSExercise
+from .ons_rest_ci import ONSCollectionInstrument
 from socket import socket, AF_INET, SOCK_STREAM
 from pathlib import Path
 from os import getcwd
@@ -78,6 +79,7 @@ class ONSEnvironment(object):
         self._asyncio = ONSAsyncIO(self)
         self._case = ONSCase(self)
         self._exercise = ONSExercise(self)
+        self._ci = ONSCollectionInstrument(self)
 
     def info(self, text):
         self.logger.info('[env] {}'.format(text))
@@ -98,6 +100,7 @@ class ONSEnvironment(object):
         self._asyncio.activate()
         self._case.activate()
         self._exercise.activate()
+        self._ci.activate()
 
     def activate(self, callback=None, app=None):
         """
@@ -329,3 +332,7 @@ class ONSEnvironment(object):
     @property
     def exercise_service(self):
         return self._exercise
+
+    @property
+    def collection_instrument(self):
+        return self._ci

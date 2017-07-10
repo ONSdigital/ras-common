@@ -1,17 +1,7 @@
-from _socket import AF_INET, SOCK_STREAM
-
 import json
-import yaml
 from os import getenv
-from socket import socket
 
-
-def get_free_port():
-    sock = socket(AF_INET, SOCK_STREAM)
-    sock.bind(('localhost', 0))
-    _, port = sock.getsockname()
-    sock.close()
-    return port
+import yaml
 
 
 def map_dict(d, key_mapper=None, value_mapper=None):
@@ -97,7 +87,6 @@ class RasCloudFoundryConfig(RasConfig):
 
 
 def make(config_data):
-    # TODO: allow a means of overrides aside from VCAP_SERVICES
     vcap_application = getenv('VCAP_APPLICATION')
     if vcap_application:
         return RasCloudFoundryConfig(config_data)

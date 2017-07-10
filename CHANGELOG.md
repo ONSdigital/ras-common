@@ -1,3 +1,7 @@
+### Version 0.2.0
+
+Introduction of ras_config, ras_database, ras_error, ras_logger and util packages.
+
 ### Version 0.1.82
 
 [Massive amount of refactoring and integration]

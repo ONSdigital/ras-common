@@ -46,6 +46,7 @@ class ONSAsyncIO(object):
         """
         if endpoint not in self._bases:
             self._bases[endpoint] = '{}://{}:{}'.format(self._env.api_protocol, self._env.api_host, self._env.api_port)
+            self._env.logger.info('[++] Setting base for "{}" to "{}"'.format(endpoint, self._bases[endpoint]))
 
         return self._bases[endpoint]
 

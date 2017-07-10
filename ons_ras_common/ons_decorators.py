@@ -41,3 +41,24 @@ def validate_jwt(scope, request, on_error=None):
 
         return authorization_required_wrapper
     return authorization_required_decorator
+
+
+def jwt_session(request):
+    """
+    Validate an incoming session and only proceed with a decoded session if the session is valid,
+    otherwise render the not-logged-in page.
+
+    :param request: The current request object
+    """
+    def extract_session(original_function):
+        @wraps(original_function)
+        def extract_session_wrapper(*args, **kwargs):
+            if 'authorization' in request.cookies:
+                session = ons_env.jwt.decode(request.cookie['authorization'])
+            else:
+                session = None
+            if not session:
+                return render_template('not-signed-in.html', _theme='default', data={"error": {"type": "failed"}})
+            return original_function(session)
+        return extract_session_wrapper
+    return extract_session

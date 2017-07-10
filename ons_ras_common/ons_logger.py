@@ -1,20 +1,9 @@
-##############################################################################
-#                                                                            #
-#   Generic Configuration tool for Micro-Service environment discovery       #
-#   License: MIT                                                             #
-#   Copyright (c) 2017 Crown Copyright (Office for National Statistics)      #
-#                                                                            #
-##############################################################################
-#
-#   ONSLogger is a generic logging module, ultimately this will be converted
-#   to output JSON format, but for now it's a simple syslog style output.
-#
-##############################################################################
-import logging
+
 import datetime
+import logging
 import sys
+
 import structlog
-import time
 
 LEVELS = {'debug': logging.DEBUG,
           'info': logging.INFO,

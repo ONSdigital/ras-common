@@ -1,13 +1,14 @@
 import importlib
 
+from flask import _app_ctx_stack
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
-from flask import _app_ctx_stack
+from structlog import get_logger
 
 from ons_ras_common.ras_database.manage import Manage
-from ons_ras_common.ras_logger import ras_logger
 
-logger = ras_logger.get_logger()
+
+logger = get_logger()
 
 
 # TODO: factor this out to the appropriate place
@@ -35,13 +36,13 @@ class RasDatabase:
         self._session = scoped_session(sessionmaker(), scopefunc=current_request)
         # TODO: review this session configuration
         self._session.configure(bind=self._engine, autoflush=False, autocommit=False, expire_on_commit=False)
-        self._activate()
+        self._create_database()
 
     @property
     def session(self):
         return self._session
 
-    def _activate(self):
+    def _create_database(self):
         db_config = self._config.dependency[self._name]
         manager = Manage(db_config, self._engine)
         if self._config.get('drop_database'):

@@ -1,6 +1,6 @@
-from ons_ras_common.ras_logger import ras_logger
+from structlog import get_logger
 
-logger = ras_logger.get_logger()
+logger = get_logger()
 
 
 class Manage:

@@ -9,6 +9,8 @@
 #   ONSCollectionInstrument wraps access to the CI service
 #
 ##############################################################################
+import crochet
+from twisted.internet import defer
 
 
 class ONSCollectionInstrument(object):
@@ -41,30 +43,8 @@ class ONSCollectionInstrument(object):
 
     def upload(self, case_id, file_obj):
 
-        payload = {'file': (file_obj.filename, file_obj.stream, file_obj.mimetype, {'Expires': 0})}
-        upload = self._env.asyncio.post_route(self._upload.format(case_id), payload)
+        upload = self._env.asyncio.post_upload(self._upload, case_id, file_obj)
         if not upload:
             return 404, {'code': 404, 'text': 'unable to upload instrument'}
 
         return 200, {'code': 200, 'text': 'instrument posted'}
-
-
-#    headers = {}
-#    # Get the uploaded file
-#    upload_file = request.files['file']
-#    upload_filename = upload_file.filename
-#    upload_file = {'file': (upload_filename, upload_file.stream, upload_file.mimetype, {'Expires': 0})}
-    # Build the URL
-#    url = Config.API_GATEWAY_COLLECTION_INSTRUMENT_URL + 'survey_responses/{}'.format(case_id)
-#    logger.debug('upload_survey URL is: {}'.format(url))
-    # Call the API Gateway Service to upload the selected file
-#    result = requests.post(url, headers, files=upload_file, verify=False)
-
-#    if result.status_code == 200:
-#        logger.debug('Upload successful')
-#        return render_template('surveys-upload-success.html', _theme='default', upload_filename=upload_filename)
-#    else:
-#        logger.debug('Upload failed')
-#        error_info = json.loads(result.text)
-#        return render_template('surveys-upload-failure.html',  _theme='default', error_info=error_info,
-#                               case_id=case_id)

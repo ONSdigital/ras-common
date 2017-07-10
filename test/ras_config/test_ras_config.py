@@ -87,7 +87,7 @@ VCAP_APP_FRAGMENT = """
 
 class MockGetenv:
 
-    def __call__(self, k):
+    def __call__(self, k, default=None):
         if k == 'VCAP_APPLICATION':
             return VCAP_APP_FRAGMENT
         elif k == 'VCAP_SERVICES':
@@ -98,34 +98,34 @@ class TestRasConfig(unittest.TestCase):
 
     def test_config_enables_lookup_of_service_info(self):
         data = yaml.load(CONFIG_FRAGMENT)
-        c = RasConfig('test', data)
+        c = RasConfig(data)
 
         service = c.service
         self.assertEqual(service['name'], "my-service")
 
     def test_get_dependency_returns_corresponding_config_section(self):
-        c = RasConfig('test', yaml.load(CONFIG_FRAGMENT))
+        c = RasConfig(yaml.load(CONFIG_FRAGMENT))
         ras_postgres = c.dependency('ras-postgres')
         self.assertEqual(ras_postgres['uri'], 'my-database-uri')
 
     def test_get_nonexistent_dependency_raises_exception(self):
-        c = RasConfig('test', yaml.load(CONFIG_FRAGMENT))
+        c = RasConfig(yaml.load(CONFIG_FRAGMENT))
         with self.assertRaises(RasDependencyError) as cm:
             c.dependency('ras-other')
 
     def test_get_dependency_returns_arbitrary_structure(self):
-        c = RasConfig('test', yaml.load(CONFIG_FRAGMENT))
+        c = RasConfig(yaml.load(CONFIG_FRAGMENT))
         ras_rabbit = c.dependency('ras-rabbit')
         self.assertEqual(ras_rabbit['protocols'], {'amqp': {'host': '0.0.0.0'}, 'other': {'host': '1.2.3.4'}})
 
     @patch('ons_ras_common.ras_config.ras_config.getenv', new_callable=MockGetenv)
     def test_config_overrides_values_from_cloudfoundry(self, _):
-        c = ras_config.make('test', yaml.load(CONFIG_FRAGMENT))
+        c = ras_config.make(yaml.load(CONFIG_FRAGMENT))
         ras_postgres = c.dependency('ras-postgres')
         self.assertEqual(ras_postgres['uri'], 'postgres://overridden')
 
     @patch('ons_ras_common.ras_config.ras_config.getenv', new_callable=MockGetenv)
     def test_config_only_overrides_when_key_present_in_cloudfoundry(self, _):
-        c = ras_config.make('test', yaml.load(CONFIG_FRAGMENT))
+        c = ras_config.make(yaml.load(CONFIG_FRAGMENT))
         ras_rabbit = c.dependency('ras-rabbit')
         self.assertEqual(ras_rabbit['protocols'], {'amqp': {'host': '0.0.0.0'}, 'other': {'host': '1.2.3.4'}})

@@ -41,7 +41,7 @@ class DependencyProxy:
 
     def __getitem__(self, item):
         k = "{}.{}".format(self._name, item)
-        return getenv(k, self._dependency[item])
+        return getenv(k) or self._dependency[item]
 
 
 class RasConfig:
@@ -51,24 +51,17 @@ class RasConfig:
         self._dependencies = lower_keys(config_data.get('dependencies', {}))
         self._features = lower_keys(config_data.get('features', {}))
 
-    # TODO env var override
-    def dependency(self, name):
-        try:
-            return DependencyProxy(self._dependencies[name], name)
-        except KeyError as e:
-            raise RasDependencyError(e)
-
     def feature(self, name, default=None):
         return self._features.get(name, default)
 
-    def get(self, k, default=None):
-        return getenv(k, default)
-
-    def __getattr__(self, k):
-        return self.get(k)
-
     def items(self):
         return self.service.items()
+
+    def dependency(self, k):
+        try:
+            return DependencyProxy(self._dependencies[k], k)
+        except KeyError:
+            raise RasDependencyError("Dependency with name '{}' not found.".format(k))
 
     def dependencies(self):
         return {k: DependencyProxy(self._dependencies[k], k) for k in self._dependencies.keys()}.items()

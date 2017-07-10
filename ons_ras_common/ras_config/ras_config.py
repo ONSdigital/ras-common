@@ -33,18 +33,36 @@ class RasDependencyError(Exception):
     pass
 
 
+class DependencyProxy:
+
+    def __init__(self, dependency, name):
+        self._dependency = lower_keys(dependency)
+        self._name = name
+
+    def __getattr__(self, item):
+        return self[item]
+
+    def __getitem__(self, item):
+        k = "{}.{}".format(self._name, item)
+        return getenv(k, self._dependency[item])
+
+
 class RasConfig:
-    def __init__(self, section, config_data):
-        # TODO: section reserved in case lookup into different config sections needed
-        # (e.g. dev/test/prod... which are NOT environments!)
+    def __init__(self, config_data):
+        # TODO: enable env var override
         self.service = PropDict(lower_keys(config_data['service']))
         self._dependencies = lower_keys(config_data.get('dependencies', {}))
+        self._features = lower_keys(config_data.get('features', {}))
 
+    # TODO env var override
     def dependency(self, name):
         try:
-            return lower_keys(self._dependencies[name])
+            return DependencyProxy(self._dependencies[name], name)
         except KeyError as e:
             raise RasDependencyError(e)
+
+    def feature(self, name, default=None):
+        return self._features.get(name, default)
 
     def get(self, k, default=None):
         return getenv(k, default)
@@ -79,17 +97,17 @@ class RasCloudFoundryConfig(RasConfig):
             return super().dependency(name)
 
 
-def make(env_name, config_data):
+def make(config_data):
     # TODO: allow a means of overrides aside from VCAP_SERVICES
     vcap_application = getenv('VCAP_APPLICATION')
     if vcap_application:
-        return RasCloudFoundryConfig(env_name, config_data)
+        return RasCloudFoundryConfig(config_data)
     else:
-        return RasConfig(env_name, config_data)
+        return RasConfig(config_data)
 
 
-def from_yaml_file(env_name, path):
+def from_yaml_file(path):
     with open(path) as f:
         data = yaml.load(f.read())
 
-    return make(env_name, data)
+    return make(data)

@@ -35,12 +35,13 @@ class RasDatabase:
         self._session = scoped_session(sessionmaker(), scopefunc=current_request)
         # TODO: review this session configuration
         self._session.configure(bind=self._engine, autoflush=False, autocommit=False, expire_on_commit=False)
+        self._activate()
 
     @property
     def session(self):
         return self._session
 
-    def activate(self):
+    def _activate(self):
         db_config = self._config.dependency(self._name)
         manager = Manage(db_config, self._engine)
         if self._config.drop_database:

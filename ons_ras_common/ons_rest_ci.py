@@ -9,9 +9,7 @@
 #   ONSCollectionInstrument wraps access to the CI service
 #
 ##############################################################################
-import crochet
-from twisted.internet import defer
-
+from os import getenv
 
 class ONSCollectionInstrument(object):
     """
@@ -26,7 +24,10 @@ class ONSCollectionInstrument(object):
 
     def activate(self):
         """"""
-        pass
+        api = getenv('ONS_API_CI', default=None)
+        if api:
+            self._env.asyncio.endpoint_init(api, self._get)
+            self._env.asyncio.endpoint_init(api, self._upload)
 
     def get_by_id(self, instrument_id):
         """
@@ -57,4 +58,4 @@ class ONSCollectionInstrument(object):
 
             return 404, {'code': 404, 'text': 'unable to upload instrument'}
         except Exception as e:
-            return 500, {'code': 500, 'text': str(e)}
+            return 500, str(e)

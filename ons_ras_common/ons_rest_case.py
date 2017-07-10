@@ -91,7 +91,7 @@ class ONSCase(object):
         #   Call the poster, returning the actual status and text to the caller
         #
         code, msg = self._env.asyncio.post_route('/cases/{}/events'.format(case_id), message).wait(2)
-        return code, {'code': code, 'text': msg}
+        return code, msg
 
     def case_status(self, case_id):
         """
@@ -108,7 +108,7 @@ class ONSCase(object):
         def calculate_status():
             for event in case_events:
                 self._env.logger.debug('A-Event category: {}'.format(event['category']))
-                if event['category'] == 'COLLECTION_INSTRUMENT_UPLOADED':
+                if event['category'] == 'SUCCESSFUL_RESPONSE_UPLOAD':
                     return 'Complete'
             for event in case_events:
                 self._env.logger.debug('B-Event category: {}'.format(event['category']))

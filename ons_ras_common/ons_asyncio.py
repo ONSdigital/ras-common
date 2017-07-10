@@ -35,6 +35,13 @@ class ONSAsyncIO(object):
         """
         self._bases = {}
 
+    def endpoint_init(self, api, endpoint):
+        """
+        Setup an endpoint relative to a specific environment
+        """
+        self._bases[endpoint] = api
+        self._env.logger.info('[@@] Setting base for "{}" to "{}"'.format(endpoint, self._bases[endpoint]))
+
     def get_base(self, endpoint):
         """
         Get a base reference for a given endpoint. Initially we're pointing at the gateway but allow

@@ -179,4 +179,5 @@ class ONSAsyncIO(object):
         self._env.logger.info('[##] call "{}"'.format(url))
         files = {upload_file.filename: upload_file}
         headers = {b'Content-Type': [b'application/json']}
-        return treq.post(url, data=payload, files = files, headers=headers).addCallback(check)
+        data = {'name': upload_file.filename, 'filename': upload_file.filename}
+        return treq.post(url, data=data, files = files, headers=headers).addCallback(check)

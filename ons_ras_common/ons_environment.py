@@ -146,7 +146,7 @@ class ONSEnvironment(object):
         self._config.read(['local.ini', '../local.ini', 'config.ini', '../config.ini'])
         self._jwt_algorithm = self.get('jwt_algorithm')
         self._jwt_secret = self.get('jwt_secret')
-        self._port = self.get(getenv('PORT', self.get('port', self.get_free_port())))
+        self._port = getenv('PORT', self.get('port', self.get_free_port()))
         self.api_host = self.get('api_host')
         self.api_port = self.get('api_port')
         self.api_protocol = self.get('api_protocol')

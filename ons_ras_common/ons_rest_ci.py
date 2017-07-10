@@ -21,8 +21,8 @@ class ONSCollectionInstrument(object):
     """
     def __init__(self, env):
         self._env = env
-        self._get = '/collection-instrument-api/1.0.2/collectioninstrument/id/{}'
-        self._upload = '/collection-instrument-api/1.0.2/survey_responses/{}'
+        self._get = '/collection-instrument-api/1.0.2/collectioninstrument/id'
+        self._upload = '/collection-instrument-api/1.0.2/survey_responses'
 
     def activate(self):
         """"""
@@ -35,7 +35,7 @@ class ONSCollectionInstrument(object):
         :param instrument_id: The id of the exercise in question
         :return: An instrument record
         """
-        instrument = self._env.asyncio.access_endpoint(self._get.format(instrument_id))
+        instrument = self._env.asyncio.access_endpoint('{}/{}'.format(self._get, instrument_id))
         if not instrument:
             return 404, {'code': 404, 'text': 'unable to find instrument for this instrument_id'}
 

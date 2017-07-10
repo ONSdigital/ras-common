@@ -14,5 +14,6 @@ include *.yaml
 include .coveragerc
 include LICENSE
 include Makefile
+include .cfignore
 recursive-include scripts *.sh
 recursive-include test *.py

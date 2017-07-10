@@ -139,7 +139,6 @@ class ONSAsyncIO(object):
             return self._env.logger.error('Endpoint call failed', endpoint=endpoint, error=str(e))
         return result
 
-
     @crochet.run_in_reactor
     def post_upload(self, endpoint, case_id, upload_file):
         """
@@ -158,26 +157,9 @@ class ONSAsyncIO(object):
                 self._env.logger.error('[case] Failed to post event', code=response.code, reason=str(msg))
             return response.code, msg
 
-        #upload_filename = upload_file.filename
-        #upload_file = {'file': (upload_filename, upload_file.stream, upload_file.mimetype, {'Expires': 0})}
-        #url = Config.API_GATEWAY_COLLECTION_INSTRUMENT_URL + 'survey_responses/{}'.format(case_id)
-
-        #result = requests.post(url, headers, files=upload_file, verify=False)
-
-        #    if result.status_code == 200:
-        #        logger.debug('Upload successful')
-        #        return render_template('surveys-upload-success.html', _theme='default', upload_filename=upload_filename)
-        #    else:
-        #        logger.debug('Upload failed')
-        #        error_info = json.loads(result.text)
-        #        return render_template('surveys-upload-failure.html',  _theme='default', error_info=error_info,
-        #                               case_id=case_id)
-
-
-
         url = '{}{}/{}'.format(self.get_base(endpoint), endpoint, case_id)
-        self._env.logger.info('[##] call "{}"'.format(url))
         files = {upload_file.filename: upload_file.stream}
         headers = {b'Content-Type': [b'application/json']}
         data = {'name': upload_file.filename, 'filename': upload_file.filename}
+        self._env.logger.info('[##] call "{}"'.format(url))
         return treq.post(url, data=data, files = files, headers=headers).addCallback(check)

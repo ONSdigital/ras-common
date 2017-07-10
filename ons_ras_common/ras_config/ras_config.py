@@ -1,12 +1,9 @@
-import json
 from _socket import AF_INET, SOCK_STREAM
-from configparser import ConfigParser, ExtendedInterpolation
+
+import json
+import yaml
 from os import getenv
 from socket import socket
-
-import yaml
-
-from ons_ras_common.util.dict_util import PropDict
 
 
 def get_free_port():
@@ -50,7 +47,7 @@ class DependencyProxy:
 class RasConfig:
     def __init__(self, config_data):
         # TODO: enable env var override
-        self.service = PropDict(lower_keys(config_data['service']))
+        self.service = config_data['service']
         self._dependencies = lower_keys(config_data.get('dependencies', {}))
         self._features = lower_keys(config_data.get('features', {}))
 
@@ -70,9 +67,18 @@ class RasConfig:
     def __getattr__(self, k):
         return self.get(k)
 
+    def items(self):
+        return self.service.items()
+
+    def dependencies(self):
+        return {k: DependencyProxy(self._dependencies[k], k) for k in self._dependencies.keys()}.items()
+
+    def features(self):
+        return self._dependencies.items()
+
 
 class CloudFoundryServices:
-    def __init__(self, section, service_data):
+    def __init__(self, service_data):
         self._lookup = {v['name']: v['credentials']
                         for service_config in service_data.values()
                         for v in service_config}
@@ -84,11 +90,11 @@ class CloudFoundryServices:
 
 class RasCloudFoundryConfig(RasConfig):
 
-    def __init__(self, section, config_data):
-        super().__init__(section, config_data)
+    def __init__(self, config_data):
+        super().__init__(config_data)
 
         vcap_services = json.loads(getenv('VCAP_SERVICES'))
-        self._services = CloudFoundryServices(section, vcap_services)
+        self._services = CloudFoundryServices(vcap_services)
 
     def dependency(self, name):
         try:

@@ -54,7 +54,7 @@ def jwt_session(request):
         @wraps(original_function)
         def extract_session_wrapper(*args, **kwargs):
             if 'authorization' in request.cookies:
-                session = ons_env.jwt.decode(request.cookie['authorization'])
+                session = ons_env.jwt.decode(request.cookies['authorization'])
             else:
                 session = None
             if not session:

@@ -57,7 +57,7 @@ class RasConfig:
         return {k: DependencyProxy(self._dependencies[k], k) for k in self._dependencies.keys()}.items()
 
     def features(self):
-        return self._dependencies.items()
+        return self._features.items()
 
 
 class CloudFoundryServices:

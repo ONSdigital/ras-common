@@ -45,7 +45,7 @@ class ONSCollectionInstrument(object):
     def upload(self, case_id, party_id, file_obj):
 
         try:
-            upload = self._env.asyncio.post_upload(self._upload, case_id, file_obj)
+            upload = self._env.asyncio.post_upload(self._upload, case_id, file_obj)._value
 
             print("UPLOAD ++ = ", upload)
 

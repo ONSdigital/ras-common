@@ -163,7 +163,7 @@ class ONSAsyncIO(object):
                 raise Exception('exception uploading file')
 
             if response.code <= 299:
-                return response
+                return True
             return response.text().addCallback(on_error, response)
 
         def fail(failure):

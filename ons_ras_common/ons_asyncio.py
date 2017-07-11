@@ -158,8 +158,14 @@ class ONSAsyncIO(object):
             :param response: A deferred response object
             :return: A deferred response object
             """
-            self._env.logger.info('Status code is : {}'.format(response.code))
-            return response
+            def on_error(failure, response):
+                print("Failure>", failure)
+                print("Response>", response)
+                raise Exception('error')
+
+            if response.code <= 299:
+                return response
+            return response.text().addCallback(on_error, response)
 
         def fail(failure):
             print("&&&& FAIL &&&& ", failure)

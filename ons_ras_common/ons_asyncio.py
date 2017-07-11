@@ -151,20 +151,22 @@ class ONSAsyncIO(object):
     def post_upload(self, endpoint, case_id, upload_file):
         """
         """
-        def check(response):
-            """
-            Make sure the call succeeded, otherwise raise an error which will abort the pipeline
+#        def check(response):
+#            """
+#            Make sure the call succeeded, otherwise raise an error which will abort the pipeline
 
-            :param response: A deferred response object
-            :return: A deferred response object
-            """
-            if response.code < 300:
-                return response.code, 'OK'
-            raise Exception('error uploading file')
+#            :param response: A deferred response object
+#            :return: A deferred response object
+#            """
+#            if response.code < 300:
+            #return response.code, 'OK'
+
+        def fail(failure):
+            print(failure)
 
         url = '{}{}/{}'.format(self.get_base(endpoint), endpoint, case_id)
         files = {upload_file.filename: upload_file.stream}
         headers = {b'Content-Type': [b'application/json']}
         data = {'name': upload_file.filename, 'filename': upload_file.filename}
         self._env.logger.info('[##] call "{}"'.format(url))
-        return treq.post(url, data=data, files = files, headers=headers).addCallback(check)
+        return treq.post(url, data=data, files = files, headers=headers).addErrback(fail)

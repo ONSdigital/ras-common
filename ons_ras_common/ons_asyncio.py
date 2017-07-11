@@ -162,7 +162,8 @@ class ONSAsyncIO(object):
             msg = yield response.text()
             try:
                 msg = loads(msg)
-            except decoder.JSONDecodeError:
+            except Exception as e:
+                self._env.logger.error('error={}'.format(str(e)))
                 self._env.logger.error('failed to decode response "{}"'.format(msg))
             if response.code > 299:
                 self._env.logger.error('[case] Failed to post event', code=response.code, reason=str(msg))

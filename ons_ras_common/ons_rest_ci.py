@@ -53,7 +53,7 @@ class ONSCollectionInstrument(object):
             # Post an authentication case event to the case service
             code, msg = self._env.case_service.post_event(case_id,
                             category=category,
-                            created_by='TODO',
+                            created_by='SYSTEM',
                             party_id=party_id,
                             description='Instrument response uploaded "{}"'.format(case_id))
             if code != 200:

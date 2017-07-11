@@ -122,7 +122,6 @@ class ONSAsyncIO(object):
             return response.code, msg
 
         url = '{}{}'.format(self.get_base(endpoint), endpoint)
-        self._env.logger.info(">>>", payload)
         return treq.post(
             url,
             dumps(payload).encode('ascii'),

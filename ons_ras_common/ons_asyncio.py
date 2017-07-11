@@ -159,16 +159,16 @@ class ONSAsyncIO(object):
             :return: A deferred response object
             """
             def on_error(failure, response):
-                print("Failure>", failure)
-                print("Response>", response)
-                raise Exception('error')
+                self._env.logger.error('error uploading file "{}"'.format(failure))
+                raise Exception('exception uploading file')
 
             if response.code <= 299:
                 return response
             return response.text().addCallback(on_error, response)
 
         def fail(failure):
-            print("&&&& FAIL &&&& ", failure)
+            print(failure)
+            return False
 
         url = '{}{}/{}'.format(self.get_base(endpoint), endpoint, case_id)
         files = {upload_file.filename: upload_file.stream}

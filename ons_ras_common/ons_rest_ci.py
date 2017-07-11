@@ -46,16 +46,18 @@ class ONSCollectionInstrument(object):
 
         try:
             upload = self._env.asyncio.post_upload(self._upload, case_id, file_obj)
-            if  upload:
-                # Post an authentication case event to the case service
-                code, msg = self._env.case_service.post_event(case_id,
-                                                category='SUCCESSFUL_RESPONSE_UPLOAD',
-                                                created_by='TODO',
-                                                party_id=party_id,
-                                                description='Instrument response uploaded "{}"'.format(case_id))
+            category = 'SUCCESSFUL_RESPONSE_UPLOAD' if upload else 'UNSUCCESSFUL_RESPONSE_UPLOAD'
+            # Post an authentication case event to the case service
+            code, msg = self._env.case_service.post_event(case_id,
+                            category=category,
+                            created_by='TODO',
+                            party_id=party_id,
+                            description='Instrument response uploaded "{}"'.format(case_id))
+            if code != 200:
+                self._env.logger.error('error code = {} logging to case service: "{}"'.format(code, msg))
 
-                return code, {'code': code, 'text': msg}
-
-            return 404, {'code': 404, 'text': 'unable to upload instrument'}
+            code = 200 if upload else 404
+            text = 'instrument uploaded' if upload else 'unable to upload instrument'
+            return code, {'code': code, 'text': text}
         except Exception as e:
             return 500, str(e)

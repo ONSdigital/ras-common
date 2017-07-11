@@ -10,17 +10,14 @@ class Config(BaseConfig):
         self.dependency = {}
         self.feature = {}
 
-    def from_yaml(self, config_file):
-        with open(config_file) as f:
-            c = ras_config.from_yaml_file(config_file)
-
-        for k, v in c.items():
+    def from_ras_config(self, config):
+        for k, v in config.items():
             self[k] = v
 
-        for k, v in c.dependencies():
+        for k, v in config.dependencies():
             self.dependency[k] = v
 
-        for k, v in c.features():
+        for k, v in config.features():
             self.feature[k] = v
 
 

@@ -17,7 +17,7 @@ from twisted.internet import defer
 #   How long (by default) do we wait for an endpoint call before we timeout?
 #
 DEFAULT_TIMEOUT = 3
-
+TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 
 class ONSAsyncIO(object):
     """
@@ -171,7 +171,8 @@ class ONSAsyncIO(object):
             return False
 
         url = '{}{}/{}'.format(self.get_base(endpoint), endpoint, case_id)
-        files = {upload_file.filename: upload_file.stream}
+        #files = {upload_file.filename: upload_file.stream}
+        files = {'files[]': (upload_file.filename, upload_file.stream, TYPE, {'Expires': 0})}
         headers = {b'Content-Type': [b'application/json']}
         data = {'name': upload_file.filename, 'filename': upload_file.filename}
         self._env.logger.info('[##] call "{}"'.format(url))

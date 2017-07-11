@@ -22,7 +22,7 @@
 ##############################################################################
 from .ons_environment import ONSEnvironment
 
-__version__ = '0.1.150'
+__version__ = '0.1.151'
 
 
 if 'ons_env' not in globals():

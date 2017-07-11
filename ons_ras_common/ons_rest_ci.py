@@ -46,6 +46,9 @@ class ONSCollectionInstrument(object):
 
         try:
             upload = self._env.asyncio.post_upload(self._upload, case_id, file_obj)
+
+            print("UPLOAD ++ = ", upload)
+
             category = 'SUCCESSFUL_RESPONSE_UPLOAD' if upload else 'UNSUCCESSFUL_RESPONSE_UPLOAD'
             # Post an authentication case event to the case service
             code, msg = self._env.case_service.post_event(case_id,

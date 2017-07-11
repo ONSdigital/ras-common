@@ -171,7 +171,7 @@ class ONSAsyncIO(object):
             return False
 
         url = '{}{}/{}'.format(self.get_base(endpoint), endpoint, case_id)
-        files = [{'file': (upload_file.filename, upload_file.stream)}]
+        files = {'file': (upload_file.filename, upload_file.stream)}
         headers = {b'Content-Type': [b'application/json']}
         data = {'name': upload_file.filename, 'filename': upload_file.filename}
         self._env.logger.info('[##] call "{}"'.format(url))

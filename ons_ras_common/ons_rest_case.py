@@ -130,3 +130,19 @@ class ONSCase(object):
             return 404, {'code': 404, 'text': 'unable to find case for this case_id'}
 
         return 200, {'code': 200, 'case': case}
+
+    def my_surveys(self, party_id, filter):
+        """
+        Interrogate the surveys todo (aggregated endpoint) and get the data needed to build
+        the my-surveys screen.
+
+        :param party_id: The concerned party
+        :param filter: An array of statuses that we're interested in
+        :return: A dictionary containing all the stuff we need for my-surveys
+        """
+        data = self._env.asyncio.access_endpoint('/surveys/todo/{}'.format(party_id), params=filter)
+        try:
+            return data.json()
+        except Exception as e:
+            self._env.logger.error('error hitting TODO endpoint "{}"'.format(str(e)))
+            return []

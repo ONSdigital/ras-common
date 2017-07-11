@@ -58,7 +58,7 @@ class ONSAsyncIO(object):
         return self._bases[endpoint]
 
     @crochet.run_in_reactor
-    def get_route(self, endpoint):
+    def get_route(self, endpoint, params):
         """
         Generic routine to hit a remote endpoint. This is set to run in the twisted reactor and will
         be called with a 'crochet' wait. So it will either return the results of the call as a Python
@@ -96,7 +96,7 @@ class ONSAsyncIO(object):
 
         # Invoke a Twisted pipeline to hit the endpoint and process the results
         url = '{}{}'.format(self.get_base(endpoint), endpoint)
-        return treq.get(url).addCallback(check).addCallback(treq.content).addCallback(json).addErrback(log)
+        return treq.get(url, params=params).addCallback(check).addCallback(treq.content).addCallback(json).addErrback(log)
 
     @crochet.run_in_reactor
     def post_route(self, endpoint, payload):
@@ -128,7 +128,7 @@ class ONSAsyncIO(object):
             headers={b'Content-Type': [b'application/json']}
         ).addCallback(check)
 
-    def access_endpoint(self, endpoint):
+    def access_endpoint(self, endpoint, params=[]):
         """
         Wrapper for hit_endpoint with generic error checking and reporting.
 
@@ -137,7 +137,7 @@ class ONSAsyncIO(object):
         """
         self._env.logger.info('[endpoint] {}'.format(endpoint))
         try:
-            result = self.get_route(endpoint).wait(DEFAULT_TIMEOUT)
+            result = self.get_route(endpoint, params).wait(DEFAULT_TIMEOUT)
         except crochet.TimeoutError:
             """The call timed out, endpoint was probably unavailable!"""
             return self._env.logger.error('Endpoint call timed out', endpoint=endpoint)

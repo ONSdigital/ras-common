@@ -138,7 +138,7 @@ class ONSCase(object):
         :param filter: An array of statuses that we're interested in
         :return: A dictionary containing all the stuff we need for my-surveys
         """
-        data = self._env.asyncio.access_endpoint('/surveys/todo/{}'.format(party_id), params=filter)
+        data = self._env.asyncio.access_endpoint('/api/1.0.0/surveys/todo/{}'.format(party_id), params=filter)
         try:
             return data.json()
         except Exception as e:

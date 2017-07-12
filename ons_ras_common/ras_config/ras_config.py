@@ -30,19 +30,33 @@ class DependencyProxy:
         return self[item]
 
     def __getitem__(self, item):
+        # TODO: consider converting the value to bool (as feature flags are always true/false)
         k = "{}.{}".format(self._name, item)
         return getenv(k) or self._dependency[item]
+
+
+class FeaturesProxy:
+
+    def __init__(self, features):
+        self._features = features
+
+    def __getattr__(self, item):
+        return self[item]
+
+    def __getitem__(self, item):
+        k = "feature.{}".format(item)
+        return getenv(k) or self._features.get(item)
 
 
 class RasConfig:
     def __init__(self, config_data):
         # TODO: enable env var override
-        self.service = config_data['service']
+        self.service = {k: getenv(k, v) for k, v in config_data['service'].items()}
         self._dependencies = lower_keys(config_data.get('dependencies', {}))
-        self._features = lower_keys(config_data.get('features', {}))
+        self._features = FeaturesProxy(config_data.get('features', {}))
 
-    def feature(self, name, default=None):
-        return self._features.get(name, default)
+    def feature(self, name):
+        return self._features[name]
 
     def items(self):
         return self.service.items()
@@ -57,7 +71,7 @@ class RasConfig:
         return {k: DependencyProxy(self._dependencies[k], k) for k in self._dependencies.keys()}.items()
 
     def features(self):
-        return self._features.items()
+        return self._features
 
 
 class CloudFoundryServices:

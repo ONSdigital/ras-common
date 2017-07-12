@@ -38,4 +38,4 @@ class Manage:
             self._engine.execute("CREATE SCHEMA IF NOT EXISTS {}".format(db_schema))
         logger.info("Creating database tables.")
         Base.metadata.create_all(self._engine)
-        logger.info("Ok, done.")
+        logger.info("Ok, database tables have been created.")

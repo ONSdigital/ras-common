@@ -17,8 +17,7 @@ class Config(BaseConfig):
         for k, v in config.dependencies():
             self.dependency[k] = v
 
-        for k, v in config.features():
-            self.feature[k] = v
+        self.feature = config.features()
 
 
 class Flask(BaseFlask):

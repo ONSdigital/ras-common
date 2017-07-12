@@ -39,25 +39,19 @@ class ONSDatabase(object):
     def session(self):
         return self._session
 
-    def warn(self, text):
-        self._env.logger.warn(text, module=__name__)
-
-    def info(self, text):
-        self._env.logger.info(text, module=__name__)
-
     def activate(self):
 
         if self._env.get('enable_database', 'false').lower() not in ['true', 'yes']:
-            return self.info('Database is NOT enabled [missing "enabled_database = true"]')
+            return self._env.logger.info('Database is NOT enabled [missing "enabled_database = true"]')
 
         if not self.check_paths():
-            return self.warn('[swagger_server/models/_models.py] file is missing')
+            return self._env.logger.info('[swagger_server/models/_models.py] file is missing')
 
         db_connection = self._env.get('db_connection')
         if not db_connection:
-            return self.warn('Database connection not available [{}]'.format(db_connection))
+            return self._env.logger.info('Database connection not available [{}]'.format(db_connection))
 
-        self.info('Database connection is "{}"'.format(db_connection))
+        self._env.logger.info('Database connection is "{}"'.format(db_connection))
         self._engine = create_engine(db_connection, convert_unicode=True)
         self._session.remove()
         self._session.configure(bind=self._engine, autoflush=True, autocommit=False, expire_on_commit=True)
@@ -73,30 +67,30 @@ class ONSDatabase(object):
         return Path('swagger_server/models/_models.py').is_file()
 
     def drop(self):
-        self.info('Dropping any existing Database Tables')
+        self._env.logger.info('Dropping any existing Database Tables')
         from swagger_server.models import _models
         connection = self._env.get('db_connection')
         schema = self._env.get('db_schema')
         if connection.startswith('postgres'):
-            self.info('Dropping pre-existing schema "{}" if it exists'.format(schema))
+            self._env.logger.info('Dropping pre-existing schema "{}" if it exists'.format(schema))
             self._base.metadata.schema = schema
             self._engine.execute("DROP SCHEMA IF EXISTS {} CASCADE".format(schema))
         else:
             self._base.metadata.drop_all(self._engine)
 
     def create(self):
-        self.info('Creating any missing Database tables')
+        self._env.logger.info('Creating any missing Database tables')
         connection = self._env.get('db_connection')
         schema = self._env.get('db_schema')
         if connection.startswith('postgres'):
-            self.info('Creating Database schema "{}"'.format(schema))
+            self._env.logger.info('Creating Database schema "{}"'.format(schema))
             self._base.metadata.schema = schema
         from swagger_server.models import _models
 
         if connection.startswith('postgres'):
-            self.info("Creating schema {} if it does't exist".format(schema))
+            self._env.logger.info("Creating schema {} if it does't exist".format(schema))
             self._engine.execute("CREATE SCHEMA IF NOT EXISTS {}".format(schema))
-        self.info("Running Create-All")
+        self._env.logger.info("Running Create-All")
         self._base.metadata.create_all(self._engine)
 
     @contextmanager

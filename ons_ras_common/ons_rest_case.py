@@ -140,6 +140,7 @@ class ONSCase(object):
         """
         data = self._env.asyncio.access_endpoint('/api/1.0.0/surveys/todo/{}'.format(party_id), params=filter)
         try:
+            print("DATA=", data)
             return data.json()
         except Exception as e:
             self._env.logger.error('error hitting TODO endpoint "{}"'.format(str(e)))

@@ -96,7 +96,7 @@ class ONSAsyncIO(object):
 
         # Invoke a Twisted pipeline to hit the endpoint and process the results
         url = '{}{}'.format(self.get_base(endpoint), endpoint)
-        return treq.get(url, params=params).addCallback(check).addCallback(treq.content).addCallback(json).addErrback(log)
+        return treq.get(url, params=str(params)).addCallback(check).addCallback(treq.content).addCallback(json).addErrback(log)
 
     @crochet.run_in_reactor
     def post_route(self, endpoint, payload):

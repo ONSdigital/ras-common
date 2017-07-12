@@ -154,7 +154,7 @@ class ONSEnvironment(object):
         self.flask_protocol = self.get('flask_protocol')
         self._debug = self.get('debug', 'False').lower() in ['yes', 'true']
 
-    def get(self, attribute, default=None, section=None):
+    def get(self, attribute, default=None, section=None, boolean=False):
         """
         Recover an attribute from a section in a .INI file
 
@@ -167,7 +167,10 @@ class ONSEnvironment(object):
             section = self._env
         if section not in self._config:
             return default
-        return self._config[section].get(attribute, default)
+        if boolean:
+            return self._config[section].getboolean(attribute, default)
+        else:
+            return self._config[section].get(attribute, default)
 
     def set(self, attribute, value):
         """
@@ -334,3 +337,7 @@ class ONSEnvironment(object):
     @property
     def collection_instrument(self):
         return self._ci
+
+    @property
+    def enable_registration(self):
+        return self.get('enable_registration', True, boolean=True)

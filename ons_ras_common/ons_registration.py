@@ -38,23 +38,13 @@ class ONSRegistration(object):
         self._state = False
         self._key = None
 
-    def log(self, text):
-        self._env.logger.info('[reg] {}'.format(text))
-
-    def info(self, text):
-        self._env.logger.info('[reg] [info] {}'.format(text))
-
-    def warn(self, text):
-        self._env.logger.warn('[reg] [warning] {}'.format(text))
-
-    def error(self, text):
-        self._env.logger.warn('[reg] [error] {}'.format(text))
-
     def activate(self):
         """
         Load the routing table and kick off the recurring registration process
         """
-        self.log('Activating service registration')
+        if not self._env.enable_registration:
+            return
+        self._env.logger.info('Activating service registration')
         legacy_key = '{}:{}'.format(self._env.flask_host, self._env.flask_port)
         self._key = self._env.get('my_ident', legacy_key, 'microservice')
         LoopingCall(self.ping).start(5, now=False)
@@ -68,7 +58,7 @@ class ONSRegistration(object):
         def registered(response):
             if response.code != 200:
                 text = yield response.text()
-                self.error('{} {}'.format(response.code, text))
+                self._env.logger.error('{} {}'.format(response.code, text))
 
         try:
             api_register = '{}://{}:{}/api/1.0.0/register'.format(
@@ -119,7 +109,7 @@ class ONSRegistration(object):
 
             return True
         except Exception as e:
-            self.warn("++++++ ERROR: {}".format(str(e)))
+            self._env.logger.error('error registering routes "{}"'.format(str(e)))
 
     def ping(self):
         """
@@ -136,10 +126,10 @@ class ONSRegistration(object):
 
             def check(response):
                 if response.code == 204:
-                    self.info('204 - Registering new routes')
+                    self._env.logger.info('204 - Registering new routes')
                     self.register_routes()
                 elif response.code != 200:
-                    self.error('{} - UNKNOWN ERROR'.format(response.code))
+                    self._env.logger.error('{} - UNKNOWN ERROR'.format(response.code))
                 return response
 
             def log(failure):
@@ -152,6 +142,6 @@ class ONSRegistration(object):
             treq.get(api_ping).addCallback(check).addErrback(log)
 
         except requests.exceptions.ConnectionError as e:
-            self.log('ping failed for "{}"'.format(api_ping))
-            self.log('ping return = "{}"'.format(e.args[0].reason))
+            self._env.logger.info('ping failed for "{}"'.format(api_ping))
+            self._env.logger.info('ping return = "{}"'.format(e.args[0].reason))
             self._state = False

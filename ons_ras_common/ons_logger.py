@@ -71,7 +71,6 @@ class ONSLogger(object):
             wrapper_class=structlog.stdlib.BoundLogger,
             cache_logger_on_first_use=True
         )
-        self.info('Logger activated', environment=self._env.environment)
 
     def info(self, *args, **kwargs):
         if self._log_format == 'text':

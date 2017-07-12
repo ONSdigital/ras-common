@@ -107,11 +107,9 @@ class ONSCase(object):
 
         def calculate_status():
             for event in case_events:
-                self._env.logger.debug('A-Event category: {}'.format(event['category']))
                 if event['category'] == 'SUCCESSFUL_RESPONSE_UPLOAD':
                     return 'Complete'
             for event in case_events:
-                self._env.logger.debug('B-Event category: {}'.format(event['category']))
                 if event['category'] == 'COLLECTION_INSTRUMENT_DOWNLOADED':
                     return 'In progress'
             return 'Not Started'

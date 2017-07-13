@@ -20,6 +20,22 @@ from twisted.logger import Logger, ILogObserver, formatEvent
 log = None
 
 
+
+#'format': '%(log_legacy)s'' \
+#''log_logger': <Logger 'twisted.python.log'>
+#'log_format': '{log_io}'' \
+#''system': '-'' \
+#''log_io': '"127.0.0.1" - - [13/Jul/2017:20:16:31 +0000] "GET /static/img/favicon.ico HTTP/1.1" 404 233 "http://localhost:5001/sign-in" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.96 Safari/537.36"',
+#'isError': 0,
+#'log_source': None,
+#'log_namespace': 'twisted.python.log',
+#'log_level': <LogLevel=info>,
+#'log_time': 1499976991.7132602,
+#'time': 1499976991.7132602,
+# 'message': (),
+#'log_legacy': <twisted.logger._stdlib.StringifiableFromEvent object at 0x7fc8aa64c8d0>}
+
+
 class ONSLogger(object):
     """
     Generic logging module mock in advance of the real module ...
@@ -34,27 +50,19 @@ class ONSLogger(object):
         """
         Activate the logging systems ...
         """
+        global log
+
         self._ident = self._env.get('my_ident', __name__, 'microservice')
         self._log_format = self._env.get('log_format', 'json')
         self._log_level = getattr(logging, self._env.get('log_level', 'INFO').upper(), 0)
 
         @provider(ILogObserver)
         def ons_logger(event):
-            #try:
-            #    stamp = arrow.get(event.get('time', 0)).format(fmt='YYYY-MM-DDTHH:mm:ssZZ')
-            #except Exception as e:
-            #    print(e)
-            #    exit()
-
             log_time = event.get('log_time')
             log_level = event.get('log_level', '')
             log_format = event.get('log_format', '')
-
-            #if self._log_format == 'text':
-                #    _getframe(7).f_globals['__name__'],
-                #    _getframe(7).f_lineno
-            name="xx"
-            line=0
+            name = _getframe(4).f_globals['__name__']
+            line = _getframe(4).f_lineno
 
             try:
                 print('{} {}: [{}] {} @{}#{}'.format(
@@ -69,28 +77,9 @@ class ONSLogger(object):
                 print(e)
             return
 
-
-
-
-            print(event)
-            print(type(event['log_format']))
-            #message = event['message']
-            #if len(message):
-            #    message = message[0]
-
-            #print(stamp,message)
-            #print(formatEvent(event))
-
-        global log
         log = Logger(observer=ons_logger)
-
+        twisted.python.log.addObserver(ons_logger)
         log.info({'event': 'Hello world', 'extra': 'More data'})
-
-        def ons_logger2(event):
-            print(event)
-
-        twisted.python.log.addObserver(ons_logger2)
-
 
 
         def ons_logger(event):

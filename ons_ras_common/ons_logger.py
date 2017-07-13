@@ -17,12 +17,7 @@ import arrow
 from sys import _getframe
 from zope.interface import provider
 from twisted.logger import Logger, ILogObserver, formatEvent
-
-@provider(ILogObserver)
-def ons_logger(event):
-    print(formatEvent(event))
-
-log = Logger(observer=ons_logger)
+log = None
 
 
 class ONSLogger(object):
@@ -34,13 +29,63 @@ class ONSLogger(object):
         self._log_format = 'text'
         self._log_level = 0
         self._ident = '~~ none ~~'
-        self.log = None
 
     def activate(self):
         """
         Activate the logging systems ...
         """
-        self.log = log
+        self._ident = self._env.get('my_ident', __name__, 'microservice')
+        self._log_format = self._env.get('log_format', 'json')
+        self._log_level = getattr(logging, self._env.get('log_level', 'INFO').upper(), 0)
+
+        @provider(ILogObserver)
+        def ons_logger(event):
+            #try:
+            #    stamp = arrow.get(event.get('time', 0)).format(fmt='YYYY-MM-DDTHH:mm:ssZZ')
+            #except Exception as e:
+            #    print(e)
+            #    exit()
+
+            log_time = event.get('log_time')
+            log_level = event.get('log_level', '')
+            log_format = event.get('log_format', '')
+
+            #if self._log_format == 'text':
+                #    _getframe(7).f_globals['__name__'],
+                #    _getframe(7).f_lineno
+            name="xx"
+            line=0
+
+            try:
+                print('{} {}: [{}] {} @{}#{}'.format(
+                    arrow.get(log_time).format(fmt='YYYY-MM-DDTHH:mm:ssZZ'),
+                    self._ident,
+                    log_level.name,
+                    log_format,
+                    name,
+                    line
+                ))
+            except Exception as e:
+                print(e)
+            return
+
+
+
+
+            print(event)
+            print(type(event['log_format']))
+            #message = event['message']
+            #if len(message):
+            #    message = message[0]
+
+            #print(stamp,message)
+            #print(formatEvent(event))
+
+        global log
+        log = Logger(observer=ons_logger)
+
+        log.info({'event': 'Hello world', 'extra': 'More data'})
+
 
         def ons_logger(event):
             """
@@ -110,26 +155,23 @@ class ONSLogger(object):
             [print('"{0}": "{1}", '.format(v[0], v[1].replace('"', "'").replace('\n', '')), end="") for v in entry]
             print("}")
 
-        self._ident = self._env.get('my_ident', __name__, 'microservice')
-        self._log_format = self._env.get('log_format', 'json')
-        self._log_level = getattr(logging, self._env.get('log_level', 'INFO').upper(), 0)
         #twisted.python.log.addObserver(ons_logger)
 
     def debug(self, *args, **kwargs):
         if self._log_level <= logging.DEBUG:
-            self.log.debug(*args, **kwargs)
+            log.debug(*args, **kwargs)
         return False
 
     def info(self, *args, **kwargs):
         if self._log_level <= logging.INFO:
-            self.log.info(*args, **kwargs)
+            log.info(*args, **kwargs)
         return False
 
     def warning(self, *args, **kwargs):
         if self._log_level <= logging.WARNING:
-            self.log.warn(*args, **kwargs)
+            log.warn(*args, **kwargs)
         return False
 
     def error(self, e):
-        self.log.error(e)
+        log.error(e)
         return False

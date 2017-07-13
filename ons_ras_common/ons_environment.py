@@ -135,7 +135,7 @@ class ONSEnvironment(object):
         if callback:
             callback(app)
 
-        Twisted(app).run(host='0.0.0.0', port=self.port)
+        Twisted(app).run(host='0.0.0.0', port=self.port, debug=False)
 
     def setup_ini(self):
         self._config.read(['local.ini', '../local.ini', 'config.ini', '../config.ini'])

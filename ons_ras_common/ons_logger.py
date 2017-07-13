@@ -23,9 +23,9 @@ class ONSLogger(object):
     """
     def __init__(self, env):
         self._env = env
-        self._log_format = None
-        self._log_level = None
-        self._ident = None
+        self._log_format = 'text'
+        self._log_level = 0
+        self._ident = '~~ none ~~'
 
     def activate(self):
         """

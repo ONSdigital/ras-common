@@ -20,41 +20,6 @@ from twisted.logger import Logger, ILogObserver, formatEvent
 log = None
 
 
-@provider(ILogObserver)
-def ons_logger(event):
-    # try:
-    #    stamp = arrow.get(event.get('time', 0)).format(fmt='YYYY-MM-DDTHH:mm:ssZZ')
-    # except Exception as e:
-    #    print(e)
-    #    exit()
-
-    log_time = event.get('log_time')
-    log_level = event.get('log_level', '')
-    log_format = event.get('log_format', '')
-
-    # if self._log_format == 'text':
-    #    _getframe(7).f_globals['__name__'],
-    #    _getframe(7).f_lineno
-    name = "xx"
-    line = 0
-
-    try:
-        print('{} {}: [{}] {} @{}#{}'.format(
-            arrow.get(log_time).format(fmt='YYYY-MM-DDTHH:mm:ssZZ'),
-            'global',
-            log_level.name,
-            log_format,
-            name,
-            line
-        ))
-    except Exception as e:
-        print(e)
-    return
-
-
-log = Logger(observer=ons_logger)
-
-
 class ONSLogger(object):
     """
     Generic logging module mock in advance of the real module ...
@@ -120,6 +85,12 @@ class ONSLogger(object):
         log = Logger(observer=ons_logger)
 
         log.info({'event': 'Hello world', 'extra': 'More data'})
+
+        def ons_logger2(event):
+            print(event)
+
+        twisted.python.log.addObserver(ons_logger2)
+
 
 
         def ons_logger(event):

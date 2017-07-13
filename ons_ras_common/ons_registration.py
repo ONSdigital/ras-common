@@ -58,7 +58,7 @@ class ONSRegistration(object):
         def registered(response):
             if response.code != 200:
                 text = yield response.text()
-                self._env.logger.error('{} {}'.format(response.code, text))
+                self._env.logger.error('({}) {}'.format(response.code, text))
 
         try:
             api_register = '{}://{}:{}/api/1.0.0/register'.format(

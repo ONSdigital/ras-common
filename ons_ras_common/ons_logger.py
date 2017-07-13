@@ -37,8 +37,10 @@ class ONSLogger(object):
 
             :param event: A Twisted event dictionary
             """
-            print(event)
+            print("~~")
+            print(dir(event))
             return
+
             try:
                 stamp = arrow.get(event.get('time', 0)).format(fmt='YYYY-MM-DDTHH:mm:ssZZ')
             except Exception as e:

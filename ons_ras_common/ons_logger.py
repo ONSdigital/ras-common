@@ -94,6 +94,7 @@ class ONSLogger(object):
 
             log_time = event.get('log_time')
             log_level = event.get('log_level', '')
+            log_fmt = event.get('log_format', '')
 
             entry = [
                 ('created', arrow.get(log_time).format(fmt='YYYY-MM-DDTHH:mm:ssZZ')),
@@ -104,7 +105,11 @@ class ONSLogger(object):
                 for k,v in message.items():
                     entry.append((k, v))
             else:
-                entry.append(('event', event['log_format'].format(**event)))
+                try:
+                    entry.append(('event', event['log_format'].format(**event)))
+                except Exception:
+                    entry.append(('event', event['log_format']))
+
             #
             #   Access to the stack frame is expensive, we only want to do this for debug messages
             #   or in instances where we've hit an error.
@@ -136,17 +141,17 @@ class ONSLogger(object):
 
     def debug(self, *args, **kwargs):
         if self._log_level <= logging.DEBUG:
-            log.debug(*args, **kwargs, logLevel=10)
+            log.debug(*args, **kwargs)
         return False
 
     def info(self, *args, **kwargs):
         if self._log_level <= logging.INFO:
-            log.info(*args, **kwargs, logLevel=20)
+            log.info(*args, **kwargs)
         return False
 
     def warning(self, *args, **kwargs):
         if self._log_level <= logging.WARNING:
-            log.warn(*args, **kwargs, logLevel=30)
+            log.warn(*args, **kwargs)
         return False
 
     def error(self, e):

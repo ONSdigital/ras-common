@@ -56,7 +56,7 @@ class ONSJwt(object):
         #
         now = datetime.now().timestamp()
         if now >= token.get('expires_at', now):
-            return self._env.logger.warning('token has expired "{}"'.format(token))
+            return self._env.logger.warning('token has expired')
         #
         #   See if there is an intersection between the scopes required for this endpoint
         #   end and the scopes available in the token.

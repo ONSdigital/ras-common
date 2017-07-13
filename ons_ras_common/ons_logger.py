@@ -15,7 +15,7 @@ import twisted
 import arrow
 from twisted.python import log
 from sys import _getframe
-
+import pdb
 
 class ONSLogger(object):
     """
@@ -37,6 +37,7 @@ class ONSLogger(object):
 
             :param event: A Twisted event dictionary
             """
+            pdb.set_trace()
             print(args, kwargs)
             return
 

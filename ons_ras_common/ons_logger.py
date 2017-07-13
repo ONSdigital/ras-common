@@ -55,7 +55,7 @@ class ONSLogger(object):
                 #    _getframe(7).f_globals['__name__'],
                 #    _getframe(7).f_lineno
                 name="xx"
-                line=len(_getframe())
+                line=0
 
                 print('{} {}: [{}] {} @{}#{}'.format(
                     stamp,

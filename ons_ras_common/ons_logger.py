@@ -14,9 +14,18 @@ import logging
 import twisted
 import arrow
 #from twisted.python import log
-from twisted.logger import Logger
 from sys import _getframe
-log = Logger()
+from zope.interface import provider
+from twisted.logger import Logger, ILogObserver, formatEvent
+
+
+
+@provider(ILogObserver)
+def simpleObserver(event):
+    print(formatEvent(event))
+
+log = Logger(observer=simpleObserver)
+
 
 class ONSLogger(object):
     """
@@ -103,7 +112,7 @@ class ONSLogger(object):
         self._ident = self._env.get('my_ident', __name__, 'microservice')
         self._log_format = self._env.get('log_format', 'json')
         self._log_level = getattr(logging, self._env.get('log_level', 'INFO').upper(), 0)
-        twisted.python.log.addObserver(ons_logger)
+        #twisted.python.log.addObserver(ons_logger)
 
     def debug(self, *args, **kwargs):
         if self._log_level <= logging.DEBUG:

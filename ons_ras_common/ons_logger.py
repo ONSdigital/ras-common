@@ -18,6 +18,12 @@ from sys import _getframe
 from zope.interface import provider
 from twisted.logger import Logger, ILogObserver, formatEvent
 
+@provider(ILogObserver)
+def ons_logger(event):
+    print(formatEvent(event))
+
+log = Logger(observer=ons_logger)
+
 
 class ONSLogger(object):
     """
@@ -34,12 +40,7 @@ class ONSLogger(object):
         """
         Activate the logging systems ...
         """
-
-        @provider(ILogObserver)
-        def ons_logger(event):
-            print(formatEvent(event))
-
-        self.log = Logger(observer=ons_logger)
+        self.log = log
 
         def ons_logger(event):
             """

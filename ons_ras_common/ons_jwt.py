@@ -24,12 +24,6 @@ class ONSJwt(object):
         self._algorithm = self._env.get('jwt_algorithm', None)
         self._secret = self._env.get('jwt_secret', None)
 
-    def debug(self, text):
-        self._env.logger.debug('[jwt] {}'.format(text))
-
-    def warn(self, text):
-        self._env.logger.warn('[jwt] {}'.format(text))
-
     def encode(self, data):
         """
         Function to encode python dict data
@@ -56,20 +50,20 @@ class ONSJwt(object):
         try:
             token = self.decode(jwt_token)
         except JWTError:
-            return self.warn('unable to decode token "{}"'.format(jwt_token))
+            return self._env.logger.warning('unable to decode token "{}"'.format(jwt_token))
         #
         #   Make sure the token hasn't expired on us ...
         #
         now = datetime.now().timestamp()
         if now >= token.get('expires_at', now):
-            return self.warn('token has expired "{}"'.format(token))
+            return self._env.logger.warning('token has expired "{}"'.format(token))
         #
         #   See if there is an intersection between the scopes required for this endpoint
         #   end and the scopes available in the token.
         #
         if not set(scope).intersection(token.get('scope', [])):
-            return self.warn('unable to validate scope for "{}"'.format(token))
-        self.debug('validated scope for "{}"'.format(token))
+            return self._env.logger.warning('unable to validate scope for "{}"'.format(token))
+        self._env.logger.debug('validated scope for "{}"'.format(token))
         return True
 
     @property

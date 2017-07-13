@@ -1,13 +1,12 @@
 import unittest
 from ons_ras_common import ons_env
 
+ons_env.setup()
+
 
 class TestStringMethods(unittest.TestCase):
 
     def setUp(self):
-        ons_env.setup_ini()
-        ons_env.logger.activate()
-        ons_env.cipher.activate()
         self.ons_cipher = ons_env.cipher
 
     def test_01_string(self):

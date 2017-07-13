@@ -31,13 +31,13 @@ class ONSLogger(object):
         """
         Activate the logging systems ...
         """
-        def ons_logger(event):
+        def ons_logger(*args, **kwargs):
             """
             Custom logger function fed from the Twisted Python Observer
 
             :param event: A Twisted event dictionary
             """
-            print("~~")
+            print(args, kwargs)
             return
 
             print(dir(event))

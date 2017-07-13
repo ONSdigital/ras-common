@@ -19,14 +19,6 @@ from zope.interface import provider
 from twisted.logger import Logger, ILogObserver, formatEvent
 
 
-
-@provider(ILogObserver)
-def simpleObserver(event):
-    print(formatEvent(event))
-
-log = Logger(observer=simpleObserver)
-
-
 class ONSLogger(object):
     """
     Generic logging module mock in advance of the real module ...
@@ -36,11 +28,19 @@ class ONSLogger(object):
         self._log_format = 'text'
         self._log_level = 0
         self._ident = '~~ none ~~'
+        self.log = None
 
     def activate(self):
         """
         Activate the logging systems ...
         """
+
+        @provider(ILogObserver)
+        def ons_logger(event):
+            print(formatEvent(event))
+
+        self.log = Logger(observer=ons_logger)
+
         def ons_logger(event):
             """
             Custom logger function fed from the Twisted Python Observer
@@ -116,19 +116,19 @@ class ONSLogger(object):
 
     def debug(self, *args, **kwargs):
         if self._log_level <= logging.DEBUG:
-            log.debug(*args, **kwargs)
+            self.log.debug(*args, **kwargs)
         return False
 
     def info(self, *args, **kwargs):
         if self._log_level <= logging.INFO:
-            log.info(*args, **kwargs)
+            self.log.info(*args, **kwargs)
         return False
 
     def warning(self, *args, **kwargs):
         if self._log_level <= logging.WARNING:
-            log.warn(*args, **kwargs)
+            self.log.warn(*args, **kwargs)
         return False
 
     def error(self, e):
-        log.error(e)
+        self.log.error(e)
         return False

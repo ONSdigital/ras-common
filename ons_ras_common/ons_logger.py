@@ -13,8 +13,10 @@
 import logging
 import twisted
 import arrow
-from twisted.python import log
+#from twisted.python import log
+from twisted.logger import Logger
 from sys import _getframe
+log = Logger()
 
 class ONSLogger(object):
     """
@@ -30,13 +32,13 @@ class ONSLogger(object):
         """
         Activate the logging systems ...
         """
-        def ons_logger(*args, **kwargs):
+        def ons_logger(event):
             """
             Custom logger function fed from the Twisted Python Observer
 
             :param event: A Twisted event dictionary
             """
-            print(args, kwargs)
+            print(event)
             return True
 
             print(dir(event))
@@ -105,19 +107,19 @@ class ONSLogger(object):
 
     def debug(self, *args, **kwargs):
         if self._log_level <= logging.DEBUG:
-            log.msg(*args, **kwargs, logLevel=logging.DEBUG)
+            log.debug(*args, **kwargs)
         return False
 
     def info(self, *args, **kwargs):
         if self._log_level <= logging.INFO:
-            log.msg(*args, **kwargs, logLevel=logging.INFO)
+            log.info(*args, **kwargs)
         return False
 
     def warning(self, *args, **kwargs):
         if self._log_level <= logging.WARNING:
-            log.msg(*args, **kwargs, logLevel=logging.WARNING)
+            log.warn(*args, **kwargs)
         return False
 
     def error(self, e):
-        log.err(e, "Error: ", logLevel=logging.ERROR)
+        log.error(e)
         return False

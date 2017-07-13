@@ -36,9 +36,8 @@ class ONSLogger(object):
 
             :param event: A Twisted event dictionary
             """
-            return True
             print(args, kwargs)
-            return
+            return True
 
             print(dir(event))
             return

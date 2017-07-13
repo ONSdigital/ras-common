@@ -58,7 +58,7 @@ class ONSRegistration(object):
         def registered(response):
             if response.code != 200:
                 text = yield response.text()
-                self._env.logger.error('({}) {}'.format(response.code, text))
+                self._env.logger.error('{} {}'.format(response.code, text))
 
         try:
             api_register = '{}://{}:{}/api/1.0.0/register'.format(
@@ -137,11 +137,11 @@ class ONSRegistration(object):
                 Just log the error, a return code of 'False' will be returned elsewhere
                 :param failure: A treq failure object
                 """
-                return self._env.logger.error('[ping-error] {}'.format(failure.getErrorMessage()))
+                return self._env.logger.warning('[ping] {}'.format(failure.getErrorMessage()))
 
             treq.get(api_ping).addCallback(check).addErrback(log)
 
         except requests.exceptions.ConnectionError as e:
-            self._env.logger.info('ping failed for "{}"'.format(api_ping))
-            self._env.logger.info('ping return = "{}"'.format(e.args[0].reason))
+            self._env.logger.warning('ping failed for "{}"'.format(api_ping))
+            self._env.logger.warning('ping return = "{}"'.format(e.args[0].reason))
             self._state = False

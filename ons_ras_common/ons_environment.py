@@ -80,14 +80,14 @@ class ONSEnvironment(object):
         self._case = ONSCase(self)
         self._exercise = ONSExercise(self)
         self._ci = ONSCollectionInstrument(self)
+        self.setup_ini()
+        self._logger.activate()
 
     def setup(self):
         """
         Setup the various modules, we want to call this specifically from the test routines
         as they won't want a running reactor for testing purposes ...
         """
-        self.setup_ini()
-        self._logger.activate()
         self._cloudfoundry.activate()
         self._database.activate()
         self._swagger.activate()

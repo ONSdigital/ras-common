@@ -25,16 +25,13 @@ class ONSSwagger(object):
         self._swagger = {}
         self._has_api = False
 
-    def info(self, text):
-        self._env.logger.info('[swagger] {}'.format(text))
-
     def activate(self):
         """
         Obligatory changes to the swagger specification based on the deployment environment
         """
         self._swagger = self._env.get('swagger', 'swagger_server/swagger/swagger.yaml')
         self._has_api = Path(self._swagger).is_file()
-        self.info('Swagger API {} detected'.format('has been' if self._has_api else 'NOT'))
+        self._env.logger.info('Swagger API {} detected'.format('has been' if self._has_api else 'NOT'))
         if not self._has_api:
             return
 
@@ -45,7 +42,7 @@ class ONSSwagger(object):
         #if remote_ms:
         port = int(self._env.api_port)
         port = 80 if port == 443 else port
-        self.info('[swagger] Setting PORT to {}'.format(port))
+        self._env.logger.info('Setting PORT to {}'.format(port))
         self.rewrite_host(self._env.api_host, port)
         #else:
         #    self.rewrite_host(self._env.api_host, self._env.api_port)
@@ -63,7 +60,7 @@ class ONSSwagger(object):
         """
         if self._has_api:
             self._spec['host'] = '{}:{}'.format(host, port)
-            self.info('Updating host to: {}'.format(self._spec['host']))
+            self._env.logger.info('Updating host to: {}'.format(self._spec['host']))
             self._changed = True
 
     def flush(self):
@@ -73,7 +70,7 @@ class ONSSwagger(object):
         if self._has_api and self._changed:
             with open(self._swagger, 'w') as io:
                 io.write(dump(self._spec))
-                self.info('Swagger API updated')
+                self._env.logger.info('Swagger API updated')
 
     @property
     def has_api(self):

@@ -23,9 +23,6 @@ class ONSRabbit(object):
         self._env = env
         self._queues = {}
 
-    def info(self, text):
-        self._env.logger.info('[rabbit] {}'.format(text))
-
     def activate(self):
         """
         Queue activation goes here if required
@@ -39,7 +36,7 @@ class ONSRabbit(object):
                 'password': self._env.get('rabbit_password', None)
             })
         if not len(self._queues):
-            self.info('No Rabbit queues detected')
+            self._env.logger.info('No Rabbit queues detected')
             self.add_service({
                 'name': 'none',
                 'host': 'none',
@@ -49,7 +46,7 @@ class ONSRabbit(object):
             })
         if self._env.debug:
             for queue in self._queues.values():
-                self.info('Queue "{name}" user="{username}" pass="{password}" host="{host}" port="{port}"'.format(**vars(queue)))
+                self._env.logger.info('Queue "{name}" user="{username}" pass="{password}" host="{host}" port="{port}"'.format(**vars(queue)))
 
     def add_service(self, que):
         self._queues[que['name']] = RabbitQueue(que)

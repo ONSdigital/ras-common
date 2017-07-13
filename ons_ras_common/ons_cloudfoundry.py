@@ -23,9 +23,6 @@ class ONSCloudFoundry(object):
         self._host = None
         self._cf_detected = False
 
-    def info(self, text):
-        self._env.logger.info('[cf] {}'.format(text))
-
     def activate(self):
         """
         See if we're running on Cloud Foundry and if we are, run the detection and
@@ -33,8 +30,8 @@ class ONSCloudFoundry(object):
         """
         vcap_application = getenv('VCAP_APPLICATION')
         if not vcap_application:
-            return self.info('Platform: LOCAL (no CF detected)')
-        self.info('Platform: CLOUD FOUNDRY')
+            return self._env.logger.info('Platform: LOCAL (no CF detected)')
+        self._env.logger.info('Platform: CLOUD FOUNDRY')
         self._cf_detected = True
         #
         #   Get our host and port
@@ -46,21 +43,21 @@ class ONSCloudFoundry(object):
             self._env.flask_host = url.split(':')[0]
             self._env.flask_port = 443
             self._env.flask_protocol = 'https'
-            self.info('Setting host to "{}" and port to "{}"'.format(self._env.api_host, self._env.api_port))
+            self._env.logger.info('Setting host to "{}" and port to "{}"'.format(self._env.api_host, self._env.api_port))
         #
         #   Now get our database connection (if there is one)
         #
         vcap_services = getenv('VCAP_SERVICES')
         vcap_services = loads(vcap_services)
         if not vcap_services:
-            return self.info('Services: No services detected')
+            return self._env.logger.info('Services: No services detected')
         for key, services in vcap_services.items():
             if key == 'rds':
                 for service in services:
                     credentials = service.get('credentials', {})
                     self._env.set('db_connection', credentials.get('uri',''))
                     self._env.set('db_connection_name', service.get('name', ''))
-                    self.info('Detected service "{}"'.format(service.get('name', '')))
+                    self._env.logger.info('Detected service "{}"'.format(service.get('name', '')))
 
             if key == 'rabbitmq':
                 for service in services:
@@ -73,7 +70,7 @@ class ONSCloudFoundry(object):
                             'password': amqp.get('password', 'no password'),
                             'name': service.get('name', 'no name')
                         })
-                    self.info('Detected service "{}"'.format(service.get('name', '')))
+                    self._env.logger.info('Detected service "{}"'.format(service.get('name', '')))
 
     @property
     def detected(self):

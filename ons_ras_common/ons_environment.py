@@ -82,7 +82,7 @@ class ONSEnvironment(object):
         self._ci = ONSCollectionInstrument(self)
 
     def info(self, text):
-        self.logger.info('[env] {}'.format(text))
+        self.logger.info(text)
 
     def setup(self):
         """
@@ -163,14 +163,16 @@ class ONSEnvironment(object):
         :param section: An optional section name, otherwise we use the environment
         :return: The value of the attribute or 'default' if not found
         """
-        if not section:
-            section = self._env
+        section = section or self._env
         if section not in self._config:
             return default
-        if boolean:
-            return self._config[section].getboolean(attribute, default)
-        else:
-            return self._config[section].get(attribute, default)
+
+        value = getenv(attribute.upper(), default=None)
+        if value:
+            return value
+
+        base = self._config[section]
+        return base.getboolean(attribute, default) if boolean else base.get(attribute, default)
 
     def set(self, attribute, value):
         """

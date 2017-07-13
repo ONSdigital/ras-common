@@ -42,7 +42,7 @@ class ONSDatabase(object):
     def activate(self):
 
         if self._env.get('enable_database', 'false').lower() not in ['true', 'yes']:
-            return self._env.logger.info('Database is NOT enabled [missing "enabled_database = true"]')
+            return self._env.logger.info('Database is NOT enabled [missing "enable_database = true"]')
 
         if not self.check_paths():
             return self._env.logger.info('[swagger_server/models/_models.py] file is missing')

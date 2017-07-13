@@ -25,15 +25,12 @@ class ONSCryptographer:
         self._env = env
         self._key = None
 
-    def debug(self, text):
-        self._env.logger.debug('[crypto] {}'.format(text))
-
     def activate(self):
         """
         Setup the required keys with values from config.ini
         """
         key = getenv('ONS_CRYPTOKEY', self._env.get('crypto_key', 'NO_KEY'))
-        self.debug('Setting crypto key to "{}"'.format(key))
+        self._env.logger.info('Setting crypto key to "{}"'.format(key))
         self._key = sha256(key.encode('utf-8')).digest()
 
     def pad(self, data):

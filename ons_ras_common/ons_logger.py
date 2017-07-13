@@ -31,17 +31,17 @@ class ONSLogger(object):
         """
         Activate the logging systems ...
         """
-        self._ident = self._env.get('my_ident', __name__, 'microservice')
-        self._log_format = self._env.get('log_format', 'json')
-        self._log_level = getattr(logging, self._env.get('log_level', 'INFO').upper(), 0)
-
         def ons_logger(event):
             """
             Custom logger function fed from the Twisted Python Observer
 
             :param event: A Twisted event dictionary
             """
-            stamp = arrow.get(event.get('time', 0)).format(fmt='YYYY-MM-DDTHH:mm:ssZZ')
+            try:
+                stamp = arrow.get(event.get('time', 0)).format(fmt='YYYY-MM-DDTHH:mm:ssZZ')
+            except Exception as e:
+                print(e)
+                exit()
             message = event['message']
             if len(message):
                 message = message[0]
@@ -51,13 +51,17 @@ class ONSLogger(object):
             if self._log_format == 'text':
                 if type(message) is not dict:
                     message = event['log_format'].format(**event)
+
+                #    _getframe(7).f_globals['__name__'],
+                #    _getframe(7).f_lineno
+                name="xx"
+                line=len(_getframe())
+
                 print('{} {}: [{}] {} @{}#{}'.format(
                     stamp,
                     self._ident,
                     event['log_level'].name,
-                    message,
-                    _getframe(7).f_globals['__name__'],
-                    _getframe(7).f_lineno
+                    message, name, line
                 ))
                 return
             #
@@ -86,6 +90,9 @@ class ONSLogger(object):
             [print('"{0}": "{1}", '.format(v[0], v[1].replace('"', "'").replace('\n', '')), end="") for v in entry]
             print("}")
 
+        self._ident = self._env.get('my_ident', __name__, 'microservice')
+        self._log_format = self._env.get('log_format', 'json')
+        self._log_level = getattr(logging, self._env.get('log_level', 'INFO').upper(), 0)
         twisted.python.log.addObserver(ons_logger)
 
     def debug(self, *args, **kwargs):

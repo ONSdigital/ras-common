@@ -81,9 +81,6 @@ class ONSEnvironment(object):
         self._exercise = ONSExercise(self)
         self._ci = ONSCollectionInstrument(self)
 
-    def info(self, text):
-        self.logger.info(text)
-
     def setup(self):
         """
         Setup the various modules, we want to call this specifically from the test routines
@@ -108,11 +105,11 @@ class ONSEnvironment(object):
         """
         self.setup()
         self._registration.activate()
-        self.info('Acquired listening port "{}"'.format(self._port))
+        self.logger.info('Acquired listening port "{}"'.format(self._port))
         if self.swagger.has_api:
             swagger_file = '{}/{}'.format(self.swagger.path, self.swagger.file)
             if not Path(swagger_file).is_file():
-                self.info('Unable to access swagger file "{}"'.format(swagger_file))
+                self.logger.info('Unable to access swagger file "{}"'.format(swagger_file))
                 return
 
             swagger_ui = self.get('swagger_ui', 'ui')
@@ -131,7 +128,6 @@ class ONSEnvironment(object):
 
             @app.teardown_appcontext
             def flush_session_manager(exception):
-                self.logger.info("Flush")
                 self.db.session.remove()
 
         reactor.suggestThreadPoolSize(200)
@@ -139,6 +135,7 @@ class ONSEnvironment(object):
         if callback:
             callback(app)
 
+        print("*****************************")
         Twisted(app).run(host='0.0.0.0', port=self.port)
 
     def setup_ini(self):

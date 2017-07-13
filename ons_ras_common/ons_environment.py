@@ -41,7 +41,6 @@ from pathlib import Path
 from os import getcwd
 
 
-
 class ONSEnvironment(object):
     """
 

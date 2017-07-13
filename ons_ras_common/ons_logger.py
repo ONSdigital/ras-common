@@ -35,6 +35,10 @@ log = None
 # 'message': (),
 #'log_legacy': <twisted.logger._stdlib.StringifiableFromEvent object at 0x7fc8aa64c8d0>}
 
+LEVELS = {
+    10: 'ingo'
+}
+
 
 class ONSLogger(object):
     """
@@ -57,80 +61,44 @@ class ONSLogger(object):
         self._log_level = getattr(logging, self._env.get('log_level', 'INFO').upper(), 0)
 
         @provider(ILogObserver)
-        def ons_logger(event):
-            log_time = event.get('log_time')
-            log_level = event.get('log_level', '')
-            log_format = event.get('log_format', '')
-            name = _getframe(4).f_globals['__name__']
-            line = _getframe(4).f_lineno
-
+        def ons_logger_text(event):
             try:
+                log_time = event.get('log_time')
+                log_level = event.get('log_level', '')
+                log_format = event.get('log_format', '')
+                name = _getframe(4).f_globals['__name__']
+                line = _getframe(4).f_lineno
                 print('{} {}: [{}] {} @{}#{}'.format(
                     arrow.get(log_time).format(fmt='YYYY-MM-DDTHH:mm:ssZZ'),
                     self._ident,
                     log_level.name,
-                    log_format,
+                    log_format.format(**event),
                     name,
                     line
                 ))
             except Exception as e:
                 print(e)
-            return
 
-        log = Logger(observer=ons_logger)
-        twisted.python.log.addObserver(ons_logger)
-        log.info({'event': 'Hello world', 'extra': 'More data'})
-
-
-        def ons_logger(event):
+        @provider(ILogObserver)
+        def ons_logger_json(event):
             """
-            Custom logger function fed from the Twisted Python Observer
+            Observation logger (JSON format)
 
-            :param event: A Twisted event dictionary
+            :param event: An event dict from the event service
             """
-            print(event)
-            return True
-
-            print(dir(event))
-            return
-
-            try:
-                stamp = arrow.get(event.get('time', 0)).format(fmt='YYYY-MM-DDTHH:mm:ssZZ')
-            except Exception as e:
-                print(e)
-                exit()
-            message = event['message']
+            message = event.get('message', ())
             if len(message):
                 message = message[0]
-            #
-            #   This is the text logger (debugging only)
-            #
-            if self._log_format == 'text':
-                if type(message) is not dict:
-                    message = event['log_format'].format(**event)
+            else:
+                message = event['log_format']
 
-                #    _getframe(7).f_globals['__name__'],
-                #    _getframe(7).f_lineno
-                name="xx"
-                line=0
+            log_time = event.get('log_time')
+            log_level = event.get('log_level', '')
 
-                try:
-                    print('{} {}: [{}] {} @{}#{}'.format(
-                        stamp,
-                        self._ident,
-                        event['log_level'].name,
-                        message, name, line
-                    ))
-                except Exception as e:
-                    print(e)
-                return
-            #
-            #   This is the JSON logger (production)
-            #
             entry = [
-                ('created', stamp),
+                ('created', arrow.get(log_time).format(fmt='YYYY-MM-DDTHH:mm:ssZZ')),
                 ('service', self._ident),
-                ('level', event['log_level'].name),
+                ('level', log_level.name)
             ]
             if type(message) is dict:
                 for k,v in message.items():
@@ -141,30 +109,44 @@ class ONSLogger(object):
             #   Access to the stack frame is expensive, we only want to do this for debug messages
             #   or in instances where we've hit an error.
             #
-            if event['log_level'].name in ['debug', 'error']:
-                entry.append(('@', '{}#{}'.format(_getframe(7).f_globals['__name__'], _getframe(7).f_lineno)))
+            if log_level in ['debug', 'error']:
+                name = _getframe(4).f_globals['__name__']
+                line = _getframe(4).f_lineno
+                entry.append(('@', '{}#{}'.format(name, line)))
             #
             #   Render the error in order so it's usable / readable in the output window
             #
+            def fmt(val):
+                if type(val) == int:
+                    return str(val)
+                return str(val).replace('"', "'").replace('\n', ' ')
+
             print("{", end="")
-            [print('"{0}": "{1}", '.format(v[0], v[1].replace('"', "'").replace('\n', '')), end="") for v in entry]
+            [print('"{0}": "{1}", '.format(v[0], fmt(v[1])), end="") for v in entry]
             print("}")
 
-        #twisted.python.log.addObserver(ons_logger)
+        if self._log_format == 'text':
+            log = Logger(observer=ons_logger_text)
+            twisted.python.log.addObserver(ons_logger_text)
+        else:
+            log = Logger(observer=ons_logger_json)
+            twisted.python.log.addObserver(ons_logger_json)
+
+        log.debug({'event': 'Hello world', 'extra': 'More data'})
 
     def debug(self, *args, **kwargs):
         if self._log_level <= logging.DEBUG:
-            log.debug(*args, **kwargs)
+            log.debug(*args, **kwargs, logLevel=10)
         return False
 
     def info(self, *args, **kwargs):
         if self._log_level <= logging.INFO:
-            log.info(*args, **kwargs)
+            log.info(*args, **kwargs, logLevel=20)
         return False
 
     def warning(self, *args, **kwargs):
         if self._log_level <= logging.WARNING:
-            log.warn(*args, **kwargs)
+            log.warn(*args, **kwargs, logLevel=30)
         return False
 
     def error(self, e):

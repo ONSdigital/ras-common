@@ -57,12 +57,15 @@ class ONSLogger(object):
                 name="xx"
                 line=0
 
-                print('{} {}: [{}] {} @{}#{}'.format(
-                    stamp,
-                    self._ident,
-                    event['log_level'].name,
-                    message, name, line
-                ))
+                try:
+                    print('{} {}: [{}] {} @{}#{}'.format(
+                        stamp,
+                        self._ident,
+                        event['log_level'].name,
+                        message, name, line
+                    ))
+                except Exception as e:
+                    print(e)
                 return
             #
             #   This is the JSON logger (production)

@@ -129,7 +129,7 @@ class ONSEnvironment(object):
         self.flask_protocol = self.get('flask_protocol')
         self._debug = self.get('debug', False).lower() in ['yes', 'true']
 
-    def get(self, attribute, default=None, section=None):
+    def get(self, attribute, default=None, section=None, boolean=False):
         """
         Recover an attribute from a section in a .INI file
 
@@ -138,11 +138,16 @@ class ONSEnvironment(object):
         :param section: An optional section name, otherwise we use the environment
         :return: The value of the attribute or 'default' if not found
         """
-        if not section:
-            section = self._env
+        section = section or self._env
         if section not in self._config:
             return default
-        return self._config[section].get(attribute, default)
+
+        value = getenv(attribute.upper(), default=None)
+        if value:
+            return value
+
+        base = self._config[section]
+        return base.getboolean(attribute, default) if boolean else base.get(attribute, default)
 
     def set(self, attribute, value):
         """

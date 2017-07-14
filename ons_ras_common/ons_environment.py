@@ -10,10 +10,12 @@
 #   files, environment variables and anything else that pops up.
 #
 ##############################################################################
-from platform import system
-if system() == "Linux":
-    from twisted.internet import epollreactor
-    epollreactor.install()
+#from platform import system
+from crochet import no_setup
+no_setup()
+#if system() == "Linux":
+#    from twisted.internet import epollreactor
+#    epollreactor.install()
 from twisted.internet import reactor
 from twisted.web import client
 from configparser import ConfigParser, ExtendedInterpolation
@@ -30,9 +32,14 @@ from .ons_swagger import ONSSwagger
 from .ons_cryptographer import ONSCryptographer
 from .ons_registration import ONSRegistration
 from .ons_rabbit import ONSRabbit
+from .ons_asyncio import ONSAsyncIO
+from .ons_rest_case import ONSCase
+from .ons_rest_exercise import ONSExercise
+from .ons_rest_ci import ONSCollectionInstrument
 from socket import socket, AF_INET, SOCK_STREAM
 from pathlib import Path
 from os import getcwd
+
 
 class ONSEnvironment(object):
     """
@@ -58,6 +65,7 @@ class ONSEnvironment(object):
 
         self._config = ConfigParser()
         self._config._interpolation = ExtendedInterpolation()
+
         self._env = getenv('ONS_ENV', 'development')
         self._logger = ONSLogger(self)
         self._database = ONSDatabase(self)
@@ -67,67 +75,79 @@ class ONSEnvironment(object):
         self._jwt = ONSJwt(self)
         self._cryptography = ONSCryptographer(self)
         self._registration = ONSRegistration(self)
-
-    def info(self, text):
-        self.logger.info('[env] {}'.format(text))
+        self._asyncio = ONSAsyncIO(self)
+        self._case = ONSCase(self)
+        self._exercise = ONSExercise(self)
+        self._ci = ONSCollectionInstrument(self)
+        self.setup_ini()
+        self._logger.activate()
 
     def setup(self):
         """
         Setup the various modules, we want to call this specifically from the test routines
         as they won't want a running reactor for testing purposes ...
         """
-        self.setup_ini()
-        self._logger.activate()
         self._cloudfoundry.activate()
         self._database.activate()
         self._swagger.activate()
         self._jwt.activate()
         self._cryptography.activate()
         self._rabbit.activate()
+        self._asyncio.activate()
+        self._case.activate()
+        self._exercise.activate()
+        self._ci.activate()
 
-    def activate(self, callback=None):
+    def activate(self, callback=None, app=None):
         """
         Start the ball rolling ...
         """
         self.setup()
         self._registration.activate()
-        self.info('Acquired listening port "{}"'.format(self._port))
-
-
+        self.logger.info('Acquired listening port "{}"'.format(self._port))
         if self.swagger.has_api:
             swagger_file = '{}/{}'.format(self.swagger.path, self.swagger.file)
             if not Path(swagger_file).is_file():
-                self.info('Unable to access swagger file "{}"'.format(swagger_file))
+                self.logger.info('Unable to access swagger file "{}"'.format(swagger_file))
                 return
 
             swagger_ui = self.get('swagger_ui', 'ui')
             app = App(__name__, specification_dir='{}/{}'.format(getcwd(), self.swagger.path))
             app.add_api(self.swagger.file, arguments={'title': self.ms_name}, swagger_url=swagger_ui)
             CORS(app.app)
+
+            @app.app.teardown_appcontext
+            def flush_session_manager(exception):
+                self.db.session.remove()
+
         else:
-            app = Flask(__name__)
-            CORS(app)
+            if not app:
+                app = Flask(__name__)
+                CORS(app)
+
+            @app.teardown_appcontext
+            def flush_session_manager(exception):
+                self.db.session.remove()
 
         reactor.suggestThreadPoolSize(200)
         client._HTTP11ClientFactory.noisy = False
         if callback:
             callback(app)
 
-        Twisted(app).run(host='0.0.0.0', port=self.port)
+        Twisted(app).run(host='0.0.0.0', port=self.port, debug=False)
 
     def setup_ini(self):
         self._config.read(['local.ini', '../local.ini', 'config.ini', '../config.ini'])
         self._jwt_algorithm = self.get('jwt_algorithm')
         self._jwt_secret = self.get('jwt_secret')
-        self._port = self.get('port', getenv('PORT', self.get_free_port()))
-        #self._gateway = self.get('api_host')
+        self._port = getenv('PORT', self.get('port', self.get_free_port()))
         self.api_host = self.get('api_host')
         self.api_port = self.get('api_port')
         self.api_protocol = self.get('api_protocol')
         self.flask_host = self.get('flask_host')
         self.flask_port = self.get('flask_port', self._port)
         self.flask_protocol = self.get('flask_protocol')
-        self._debug = self.get('debug', False).lower() in ['yes', 'true']
+        self._debug = self.get('debug', 'False').lower() in ['yes', 'true']
 
     def get(self, attribute, default=None, section=None, boolean=False):
         """
@@ -171,7 +191,7 @@ class ONSEnvironment(object):
 
     @property
     def port(self):
-        return self._port
+        return int(self._port)
 
     @port.setter
     def port(self, value):
@@ -298,3 +318,23 @@ class ONSEnvironment(object):
     @property
     def debug(self):
         return self._debug
+
+    @property
+    def asyncio(self):
+        return self._asyncio
+
+    @property
+    def case_service(self):
+        return self._case
+
+    @property
+    def exercise_service(self):
+        return self._exercise
+
+    @property
+    def collection_instrument(self):
+        return self._ci
+
+    @property
+    def enable_registration(self):
+        return self.get('enable_registration', True, boolean=True)

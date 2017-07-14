@@ -19,7 +19,9 @@ here = path.abspath(path.dirname(__file__))
 with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = f.read()
 
-__version__ = '0.1.215'
+#__version__ = '0.1.215'
+ons_env = None
+from ons_ras_common import __version__
 
 setup(
     name='ons_ras_common',

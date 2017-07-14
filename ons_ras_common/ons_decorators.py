@@ -1,19 +1,20 @@
-##############################################################################
-#                                                                            #
-#   ONS Digital JWT token handling                                           #
-#   License: MIT                                                             #
-#   Copyright (c) 2017 Crown Copyright (Office for National Statistics)      #
-#                                                                            #
-##############################################################################
-#
-#   ons_decorators is a generic decorator library hopefully containing all of
-#   our custom decorators. i.e. any generic functionality you may wish to
-#   import into your micro-service.
-#
-##############################################################################
+"""
+
+   ONS Digital JWT token handling
+   License: MIT
+   Copyright (c) 2017 Crown Copyright (Office for National Statistics)
+
+
+   ons_decorators is a generic decorator library hopefully containing all of
+   our custom decorators. i.e. any generic functionality you may wish to
+   import into your micro-service.
+
+"""
 from . import ons_env
 from functools import wraps
 from flask import render_template
+from contextlib import contextmanager
+from uuid import uuid4
 
 
 def validate_jwt(scope, request, on_error=None):
@@ -62,3 +63,42 @@ def jwt_session(request):
             return original_function(session)
         return extract_session_wrapper
     return extract_session
+
+
+@contextmanager
+def _bind_logger(request):
+    """
+    For local use only, referenced by 'before_request', essentially this information
+    is included in each logger event within the request context so you can match up log
+    events that relate to any given endpoint request. This is useful in an environment where
+    you're logging against multiple concurrent requests which may produce interleaved entries
+    in the log output.
+
+    :param request: A standard request object
+    """
+    try:
+        ons_env.logger.bind({
+            'tx_id': str(uuid4()),
+            'method': request.method,
+            'path': request.full_path
+        })
+        yield
+    finally:
+        ons_env.logger.unbind()
+
+
+def before_request(request):
+    """
+    Binds additional logging information to the logger within the context of this
+    request. Data is stored on a thread-local basis to play nice with WSGI.
+
+    :param request: The request object passed in
+    :return: the result of the passed function
+    """
+    def before_request_decorator(original_function):
+        @wraps(original_function)
+        def before_request_wrapper(*args, **kwargs):
+            with _bind_logger(request):
+                return original_function(*args, **kwargs)
+        return before_request_wrapper
+    return before_request_decorator

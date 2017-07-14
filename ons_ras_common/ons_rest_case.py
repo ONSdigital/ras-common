@@ -93,29 +93,6 @@ class ONSCase(object):
         code, msg = self._env.asyncio.post_route('/cases/{}/events'.format(case_id), message).wait(2)
         return code, msg
 
-    def case_status(self, case_id):
-        """
-        Calculate the 'status' for a given case (for surveys/todo)
-
-        :param case_id: the id of the case in question
-        :return: the current status
-        """
-        case_events = self._env.asyncio.access_endpoint('/cases/{}/events'.format(case_id))
-
-        if not case_events:
-            return 404, {'code': 404, 'text': 'unable to find cases for this case_id'}
-
-        def calculate_status():
-            for event in case_events:
-                if event['category'] == 'SUCCESSFUL_RESPONSE_UPLOAD':
-                    return 'Complete'
-            for event in case_events:
-                if event['category'] == 'COLLECTION_INSTRUMENT_DOWNLOADED':
-                    return 'In progress'
-            return 'Not Started'
-
-        return 200, {'code': 200, 'text': calculate_status()}
-
     def get_by_id(self, case_id):
         """
         Recover a case by case_id

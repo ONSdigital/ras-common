@@ -21,9 +21,8 @@ TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 
 class ONSAsyncIO(object):
     """
-    This class is designed to take all the work out of accessing the case service. Initially it
-    should be able to validate and log events against the case service and also query the event
-    service for specific combinations of events. (for example to determine case status)
+    Provide a single point of entry for AsyncIO routines which provides a single
+    point of maintenance for future routing options, whatever they may be.
     """
     def __init__(self, env):
         self._env = env

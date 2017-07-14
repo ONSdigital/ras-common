@@ -99,6 +99,7 @@ def before_request(request):
         @wraps(original_function)
         def before_request_wrapper(*args, **kwargs):
             with _bind_logger(request):
-                return original_function(*args, **kwargs)
+                result = original_function(*args, **kwargs)
+            return result
         return before_request_wrapper
     return before_request_decorator

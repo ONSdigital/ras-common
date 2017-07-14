@@ -20,8 +20,6 @@
 #   o Generic cryptography (encryption / decryption)
 #
 ##############################################################################
-from .ons_environment import ONSEnvironment
-
-
 if 'ons_env' not in globals():
+    from .ons_environment import ONSEnvironment
     ons_env = ONSEnvironment()

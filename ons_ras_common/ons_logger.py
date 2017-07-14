@@ -176,6 +176,7 @@ class ONSLogger(object):
         :param key: A unique key to bind
         :param extra: The data to bind
         """
+        print("Bind: ", extra)
         self._local.extra = extra
 
     def unbind(self):
@@ -184,4 +185,5 @@ class ONSLogger(object):
 
         :param key: A unique key to unbind
         """
+        print("unBind: ", self._local.extra)
         self._local.extra = None

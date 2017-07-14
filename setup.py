@@ -21,7 +21,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 
 #__version__ = '0.1.215'
 ons_env = None
-from ons_ras_common import __version__
+from ons_ras_common.ons_version import __version__
 
 setup(
     name='ons_ras_common',

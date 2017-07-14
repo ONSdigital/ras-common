@@ -14,6 +14,7 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from pathlib import Path
+from contextlib import contextmanager
 
 
 class ONSDatabase(object):
@@ -59,7 +60,7 @@ class ONSDatabase(object):
         self.info('Database connection is "{}"'.format(db_connection))
         self._engine = create_engine(db_connection, convert_unicode=True)
         self._session.remove()
-        self._session.configure(bind=self._engine, autoflush=False, autocommit=False, expire_on_commit=False)
+        self._session.configure(bind=self._engine, autoflush=True, autocommit=False, expire_on_commit=True)
         if self._env.drop_database:
             self.drop()
         self.create()
@@ -97,3 +98,16 @@ class ONSDatabase(object):
             self._engine.execute("CREATE SCHEMA IF NOT EXISTS {}".format(schema))
         self.info("Running Create-All")
         self._base.metadata.create_all(self._engine)
+
+    @contextmanager
+    def transaction(self):
+        """Provide a transactional scope around a series of operations."""
+        session = self._session()
+        try:
+            yield session
+            session.commit()
+        except:
+            session.rollback()
+            raise
+        finally:
+            session.close()

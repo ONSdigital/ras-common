@@ -129,6 +129,11 @@ class ONSEnvironment(object):
             def flush_session_manager(exception):
                 self.db.session.remove()
 
+            @app.teardown_appcontext
+            def flush_session_manager(exception):
+                self.logger.info("Flush")
+                self.db.session.remove()
+
         reactor.suggestThreadPoolSize(200)
         client._HTTP11ClientFactory.noisy = False
         if callback:

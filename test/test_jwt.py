@@ -2,13 +2,12 @@ import unittest
 from datetime import datetime, timedelta
 from ons_ras_common import ons_env
 
+import sys
 
 class TestStringMethods(unittest.TestCase):
 
     def setUp(self):
-        ons_env.setup_ini()
-        ons_env.logger.activate()
-        ons_env._jwt.activate()
+        ons_env.setup()
         self.ons_token = ons_env.jwt
         self.now = datetime.now()
 

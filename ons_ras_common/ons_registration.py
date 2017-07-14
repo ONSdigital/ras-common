@@ -93,6 +93,7 @@ class ONSRegistration(object):
                         'port': self._env.flask_port,
                     }
                 route = dict(route, **{'uri': uri, 'key': self._key})
+                self._env.logger.info('Route> {}'.format(str(route)))
                 treq.post(api_register, data={'details': dumps(route)}).addCallback(registered)
 
             swagger_paths = ['/ui/css', '/ui/lib', '/ui/images', '/swagger.json']
@@ -111,7 +112,8 @@ class ONSRegistration(object):
                     'port': self._env.flask_port,
                     'uri': uri,
                     'key': self._key,
-                    'ui': path == ui
+                    'ui': path == ui,
+                    'name': self._env.get('my_name', 'no local name', 'microservice')
                 }
                 treq.post(api_register, data={'details': dumps(route)}).addCallback(registered)
 
@@ -131,10 +133,10 @@ class ONSRegistration(object):
                 self._env.api_port,
                 self._key
             )
-            self.info('********* PING: {}'.format(api_ping))
+
             def status_check(response):
                 if response.code == 204:
-                    self.error('200 - REGISTER')
+                    self.info('204 - Registering new routes')
                     self.register_routes()
                 elif response.code != 200:
                     self.error('{} - UNKNOWN ERROR'.format(response.code))

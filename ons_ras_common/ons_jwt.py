@@ -21,8 +21,8 @@ class ONSJwt(object):
         """
         Read in defaults from the config.ini
         """
-        self._algorithm = self._env.jwt_algorithm
-        self._secret = self._env.jwt_secret
+        self._algorithm = self._env.get('jwt_algorithm', None)
+        self._secret = self._env.get('jwt_secret', None)
 
     def debug(self, text):
         self._env.logger.debug('[jwt] {}'.format(text))
@@ -72,3 +72,11 @@ class ONSJwt(object):
             return self.warn('unable to validate scope for "{}"'.format(token))
         self.debug('validated scope for "{}"'.format(token))
         return True
+
+    @property
+    def algorithm(self):
+        return self._algorithm
+
+    @property
+    def secret(self):
+        return self._secret

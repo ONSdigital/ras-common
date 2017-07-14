@@ -76,15 +76,15 @@ def _bind_logger(request):
 
     :param request: A standard request object
     """
-    #try:
-    ons_env.logger.bind({
-        'tx_id': str(uuid4()),
-        'method': request.method,
-        'path': request.full_path
-    })
-    yield
-    #finally:
-    ons_env.logger.unbind()
+    try:
+        ons_env.logger.bind({
+            'tx_id': str(uuid4()),
+            'method': request.method,
+            'path': request.full_path
+        })
+        yield
+    finally:
+        ons_env.logger.unbind()
 
 
 def before_request(request):
@@ -98,7 +98,7 @@ def before_request(request):
     def before_request_decorator(original_function):
         @wraps(original_function)
         def before_request_wrapper(*args, **kwargs):
-            with _bind_logger(request) as binder:
+            with _bind_logger(request):
                 result = original_function(*args, **kwargs)
             return result
         return before_request_wrapper

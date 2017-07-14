@@ -1,25 +1,13 @@
-##############################################################################
-#                                                                            #
-#   Generic Configuration tool for Micro-Service environment discovery       #
-#   License: MIT                                                             #
-#   Copyright (c) 2017 Crown Copyright (Office for National Statistics)      #
-#                                                                            #
-##############################################################################
-#
-#   This is a common library package used to wrap standard ONS Micro-service
-#   functionality. Specifically it covers the following aspects;
-#
-#   o Cloud Foundry startup
-#   o Logging initialisation
-#   o Database connections and automatic schema creation
-#   o API Gateway registration
-#
-#   Utility routines provided include;
-#
-#   o JWT token encoding / decoding
-#   o Generic cryptography (encryption / decryption)
-#
-##############################################################################
+"""
+
+   Generic Configuration tool for Micro-Service environment discovery
+   License: MIT
+   Copyright (c) 2017 Crown Copyright (Office for National Statistics)
+
+"""
+for item in list(globals()):
+    print(item)
 if 'ons_env' not in globals():
+    from .ons_version import __version__
     from .ons_environment import ONSEnvironment
     ons_env = ONSEnvironment()

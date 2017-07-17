@@ -1,15 +1,13 @@
-##############################################################################
-#                                                                            #
-#   Generic Configuration tool for Micro-Service environment discovery       #
-#   License: MIT                                                             #
-#   Copyright (c) 2017 Crown Copyright (Office for National Statistics)      #
-#                                                                            #
-##############################################################################
-#
-#   ONSDatabase wraps all database functionality including ORM handling
-#   and generic schema creation.
-#
-##############################################################################
+"""
+
+   Generic Configuration tool for Micro-Service environment discovery
+   License: MIT
+   Copyright (c) 2017 Crown Copyright (Office for National Statistics)
+
+   ONSDatabase wraps all database functionality including ORM handling
+   and generic schema creation.
+
+"""
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
@@ -26,33 +24,25 @@ class ONSDatabase(object):
         self._engine = None
         self._base = declarative_base()
         self._session = scoped_session(sessionmaker())
-
-    @property
-    def base(self):
-        return self._base
-
-    @property
-    def engine(self):
-        return self._engine
-
-    @property
-    def session(self):
-        return self._session
+        self._connection = None
 
     def activate(self):
-
         if self._env.get('enable_database', 'false').lower() not in ['true', 'yes']:
-            return self._env.logger.info('Database is NOT enabled [missing "enable_database = true"]')
+            return self._env.logger.info('Database is NOT enabled [missing "enabled_database = true"]')
 
         if not self.check_paths():
             return self._env.logger.info('[swagger_server/models/_models.py] file is missing')
 
-        db_connection = self._env.get('db_connection')
-        if not db_connection:
-            return self._env.logger.info('Database connection not available [{}]'.format(db_connection))
+        if not len(self._env.cf.databases):
+            if not self._env.get('db_connection'):
+                return self._env.logger.info('no databases available')
+            else:
+                self._connection = self._env.get('db_connection')
+        else:
+            self._connection = self._env.cf.databases[0].uri
 
-        self._env.logger.info('Database connection is "{}"'.format(db_connection))
-        self._engine = create_engine(db_connection, convert_unicode=True)
+        self._env.logger.info('Database connection is "{}"'.format(self._connection))
+        self._engine = create_engine(self._connection, convert_unicode=True)
         self._session.remove()
         self._session.configure(bind=self._engine, autoflush=True, autocommit=False, expire_on_commit=True)
         if self._env.drop_database:
@@ -69,9 +59,8 @@ class ONSDatabase(object):
     def drop(self):
         self._env.logger.info('Dropping any existing Database Tables')
         from swagger_server.models import _models
-        connection = self._env.get('db_connection')
         schema = self._env.get('db_schema')
-        if connection.startswith('postgres'):
+        if self._connection.startswith('postgres'):
             self._env.logger.info('Dropping pre-existing schema "{}" if it exists'.format(schema))
             self._base.metadata.schema = schema
             self._engine.execute("DROP SCHEMA IF EXISTS {} CASCADE".format(schema))
@@ -80,18 +69,29 @@ class ONSDatabase(object):
 
     def create(self):
         self._env.logger.info('Creating any missing Database tables')
-        connection = self._env.get('db_connection')
         schema = self._env.get('db_schema')
-        if connection.startswith('postgres'):
+        if self._connection.startswith('postgres'):
             self._env.logger.info('Creating Database schema "{}"'.format(schema))
             self._base.metadata.schema = schema
         from swagger_server.models import _models
 
-        if connection.startswith('postgres'):
+        if self._connection.startswith('postgres'):
             self._env.logger.info("Creating schema {} if it does't exist".format(schema))
             self._engine.execute("CREATE SCHEMA IF NOT EXISTS {}".format(schema))
         self._env.logger.info("Running Create-All")
         self._base.metadata.create_all(self._engine)
+
+    @property
+    def base(self):
+        return self._base
+
+    @property
+    def engine(self):
+        return self._engine
+
+    @property
+    def session(self):
+        return self._session
 
     @contextmanager
     def transaction(self):

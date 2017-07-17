@@ -10,12 +10,8 @@
 #   files, environment variables and anything else that pops up.
 #
 ##############################################################################
-#from platform import system
 from crochet import no_setup
 no_setup()
-#if system() == "Linux":
-#    from twisted.internet import epollreactor
-#    epollreactor.install()
 from twisted.internet import reactor
 from twisted.web import client
 from configparser import ConfigParser, ExtendedInterpolation
@@ -42,9 +38,7 @@ from os import getcwd
 
 
 class ONSEnvironment(object):
-    """
 
-    """
     def __init__(self):
         """
         Setup access to ini files and the environment based on the environment
@@ -88,6 +82,14 @@ class ONSEnvironment(object):
         as they won't want a running reactor for testing purposes ...
         """
         self._cloudfoundry.activate()
+
+        self._flask_port = getenv('PORT')
+        if not self._flask_port:
+            if self.cf.detected:
+                self._flask_port = self.cf.port
+            else:
+                self._flask_port = self.get('flask_port', self.get_free_port())
+
         self._database.activate()
         self._swagger.activate()
         self._jwt.activate()
@@ -134,20 +136,18 @@ class ONSEnvironment(object):
         if callback:
             callback(app)
 
-        Twisted(app).run(host='0.0.0.0', port=self.port, debug=False)
+        Twisted(app).run(host='0.0.0.0', port=self.flask_port, debug=False)
 
     def setup_ini(self):
         self._config.read(['local.ini', '../local.ini', 'config.ini', '../config.ini'])
         self._jwt_algorithm = self.get('jwt_algorithm')
         self._jwt_secret = self.get('jwt_secret')
-        self._port = getenv('PORT', self.get('port', self.get_free_port()))
         self.api_host = self.get('api_host')
         self.api_port = self.get('api_port')
         self.api_protocol = self.get('api_protocol')
         self.flask_host = self.get('flask_host')
-        self.flask_port = self.get('flask_port', self._port)
         self.flask_protocol = self.get('flask_protocol')
-        self._debug = self.get('debug', 'False').lower() in ['yes', 'true']
+        self._debug = self.get('debug', 'False', boolean=True)
 
     def get(self, attribute, default=None, section=None, boolean=False):
         """
@@ -188,14 +188,6 @@ class ONSEnvironment(object):
     @property
     def drop_database(self):
         return self.get('drop_database', 'false').lower() in ['yes', 'true']
-
-    @property
-    def port(self):
-        return int(self._port)
-
-    @port.setter
-    def port(self, value):
-        self._port = value
 
     @property
     def host(self):

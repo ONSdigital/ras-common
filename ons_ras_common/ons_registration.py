@@ -1,20 +1,18 @@
-##############################################################################
-#                                                                            #
-#   Generic Configuration tool for Micro-Service environment discovery       #
-#   License: MIT                                                             #
-#   Copyright (c) 2017 Crown Copyright (Office for National Statistics)      #
-#                                                                            #
-##############################################################################
-#
-#   ONSRegistration takes care of registering the Micro-service with the
-#   RAS API gateway, and in future any other gateways involved in platform
-#   provisioning.
-#
-##############################################################################
+"""
+
+   Generic Configuration tool for Micro-Service environment discovery
+   License: MIT
+   Copyright (c) 2017 Crown Copyright (Office for National Statistics)
+
+
+   ONSRegistration takes care of registering the Micro-service with the
+   RAS API gateway, and in future any other gateways involved in platform
+   provisioning.
+
+"""
 from json import dumps
 from twisted.internet.defer import inlineCallbacks
 from twisted.internet.task import LoopingCall
-from twisted.internet import reactor
 import urllib3
 import requests
 import treq

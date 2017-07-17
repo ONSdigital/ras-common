@@ -48,9 +48,9 @@ class ONSEnvironment(object):
         self._host = None
         self._gateway = None
         self._debug = None
-        self.api_protocol = None
-        self.api_host = None
-        self.api_port = None
+        self._api_protocol = None
+        self._api_host = None
+        self._api_port = None
 
         self._config = ConfigParser()
         self._config._interpolation = ExtendedInterpolation()
@@ -130,9 +130,9 @@ class ONSEnvironment(object):
         self._config.read(['local.ini', '../local.ini', 'config.ini', '../config.ini'])
         self._jwt_algorithm = self.get('jwt_algorithm')
         self._jwt_secret = self.get('jwt_secret')
-        self.api_host = self.get('api_host')
-        self.api_port = self.get('api_port')
-        self.api_protocol = self.get('api_protocol')
+        self._api_host = self.get('api_host')
+        self._api_port = self.get('api_port')
+        self._api_protocol = self.get('api_protocol')
         self._debug = self.get('debug', 'False', boolean=True)
 
     def get(self, attribute, default=None, section=None, boolean=False):
@@ -178,15 +178,6 @@ class ONSEnvironment(object):
     @property
     def host(self):
         return self._host if self._host else 'localhost'
-
-    @host.setter
-    def host(self, value):
-        self._host = value
-
-    @property
-    def gateway(self):
-        #return self._gateway
-        return self.api_host
 
     @property
     def db(self):
@@ -234,36 +225,27 @@ class ONSEnvironment(object):
 
     @property
     def is_secure(self):
-        return self.get('authentication', 'true').lower() in ['yes', 'true']
+        return self.get('authentication', 'true', boolean=True)
 
     @property
     def protocol(self):
-        #return self.get('api_protocol', 'http')
         return self.api_protocol
 
     @property
     def api_protocol(self):
         return self._api_protocol
 
-    @api_protocol.setter
-    def api_protocol(self, value):
-        self._api_protocol = value
-
     @property
     def api_host(self):
         return self._api_host
 
-    @api_host.setter
-    def api_host(self, value):
-        self._api_host = value
+    @property
+    def gateway(self):
+        return self.api_host
 
     @property
     def api_port(self):
         return self._api_port
-
-    @api_port.setter
-    def api_port(self, value):
-        self._api_port = value
 
     @property
     def rabbit(self):

@@ -4,7 +4,7 @@ from ons_ras_common import ons_env
 ons_env.setup()
 
 
-class TestStringMethods(unittest.TestCase):
+class TestEncryption(unittest.TestCase):
 
     def setUp(self):
         self.ons_cipher = ons_env.cipher

@@ -5,7 +5,7 @@ from ons_ras_common import ons_env
 ons_env.setup()
 
 
-class TestStringMethods(unittest.TestCase):
+class TestJWT(unittest.TestCase):
 
     def setUp(self):
         self.ons_token = ons_env.jwt

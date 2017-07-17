@@ -105,7 +105,7 @@ class ONSLogger(object):
             #
             #   Include any "bound" data from thread-local storage
             #
-            if self._local.extra:
+            if hasattr(self._local, "extra") and self._local.extra:
                 for k,v in self._local.extra.items():
                     entry.append((k, v))
             #

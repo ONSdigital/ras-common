@@ -1,8 +1,10 @@
 """
+
    Generic Configuration tool for Micro-Service environment discovery
    License: MIT
    Copyright (c) 2017 Crown Copyright (Office for National Statistics)
    ONSCloudFoundry wraps Cloud Foundry detection and setup routines.
+
 """
 from os import getenv
 from json import loads

@@ -1,15 +1,13 @@
-##############################################################################
-#                                                                            #
-#   Generic Configuration tool for Micro-Service environment discovery       #
-#   License: MIT                                                             #
-#   Copyright (c) 2017 Crown Copyright (Office for National Statistics)      #
-#                                                                            #
-##############################################################################
-#
-#   ONSEnvironment wraps the application environment in terms of configuration
-#   files, environment variables and anything else that pops up.
-#
-##############################################################################
+"""
+
+   Generic Configuration tool for Micro-Service environment discovery
+   License: MIT
+   Copyright (c) 2017 Crown Copyright (Office for National Statistics)
+
+   ONSEnvironment wraps the application environment in terms of configuration
+   files, environment variables and anything else that pops up.
+
+"""
 from crochet import no_setup
 no_setup()
 from twisted.internet import reactor
@@ -53,9 +51,6 @@ class ONSEnvironment(object):
         self.api_protocol = None
         self.api_host = None
         self.api_port = None
-        self.flask_protocol = None
-        self.flask_host = None
-        self.flask_port = None
 
         self._config = ConfigParser()
         self._config._interpolation = ExtendedInterpolation()
@@ -82,14 +77,6 @@ class ONSEnvironment(object):
         as they won't want a running reactor for testing purposes ...
         """
         self._cloudfoundry.activate()
-
-        self._flask_port = getenv('PORT')
-        if not self._flask_port:
-            if self.cf.detected:
-                self._flask_port = self.cf.port
-            else:
-                self._flask_port = self.get('flask_port', self.get_free_port())
-
         self._database.activate()
         self._swagger.activate()
         self._jwt.activate()
@@ -145,8 +132,6 @@ class ONSEnvironment(object):
         self.api_host = self.get('api_host')
         self.api_port = self.get('api_port')
         self.api_protocol = self.get('api_protocol')
-        self.flask_host = self.get('flask_host')
-        self.flask_protocol = self.get('flask_protocol')
         self._debug = self.get('debug', 'False', boolean=True)
 
     def get(self, attribute, default=None, section=None, boolean=False):
@@ -280,30 +265,6 @@ class ONSEnvironment(object):
         self._api_port = value
 
     @property
-    def flask_protocol(self):
-        return self._flask_protocol
-
-    @flask_protocol.setter
-    def flask_protocol(self, value):
-        self._flask_protocol = value
-
-    @property
-    def flask_host(self):
-        return self._flask_host
-
-    @flask_host.setter
-    def flask_host(self, value):
-        self._flask_host = value
-
-    @property
-    def flask_port(self):
-        return self._flask_port
-
-    @flask_port.setter
-    def flask_port(self, value):
-        self._flask_port = value
-
-    @property
     def rabbit(self):
         return self._rabbit
 
@@ -330,3 +291,34 @@ class ONSEnvironment(object):
     @property
     def enable_registration(self):
         return self.get('enable_registration', True, boolean=True)
+
+    @property
+    def flask_protocol(self):
+        protocol = getenv('FLASK_PROTOCOL')
+        if not protocol:
+            if self.cf.detected:
+                protocol = self.cf.protocol
+        else:
+            protocol = self.get('flask_protocol', 'http')
+        return
+
+    @property
+    def flask_host(self):
+        host = getenv('FLASK_HOST')
+        if not host:
+            if self.cf.detected:
+                return self.cf.host
+        else:
+            protocol = self.get('flask_host', 'localhost')
+        return host
+
+    @property
+    def flask_port(self):
+        port = getenv('FLASK_PORT')
+        if not port:
+            if self.cf.detected:
+                port = self.cf.port
+            else:
+                port = self.get('flask_port', self.get_free_port())
+
+        return port

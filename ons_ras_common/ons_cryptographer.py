@@ -1,10 +1,10 @@
-##############################################################################
-#                                                                            #
-#   Simple AES256 Cryptographer routine to handle string encryption          #
-#   License: MIT                                                             #
-#   Copyright (c) 2017 Crown Copyright (Office for National Statistics)      #
-#                                                                            #
-##############################################################################
+"""
+
+   Simple AES256 Cryptographer routine to handle string encryption
+   License: MIT
+   Copyright (c) 2017 Crown Copyright (Office for National Statistics)
+
+"""
 from Crypto import Random
 from Crypto.Cipher import AES
 from hashlib import sha256

@@ -1,9 +1,12 @@
 """
+
    ONS Digital Rabbit queue handling
    License: MIT
    Copyright (c) 2017 Crown Copyright (Office for National Statistics)
+
     RabbitMQ helper function, this can probably be refactored out, but for now
     it maintains a handy compatibility layer for other modules.
+
 """
 
 

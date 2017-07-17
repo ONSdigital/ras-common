@@ -1,15 +1,13 @@
-##############################################################################
-#                                                                            #
-#   Generic Configuration tool for Micro-Service environment discovery       #
-#   License: MIT                                                             #
-#   Copyright (c) 2017 Crown Copyright (Office for National Statistics)      #
-#                                                                            #
-##############################################################################
-#
-#   ONSSwagger is a wrapper for the OpenAPI spec (if there is one) for the
-#   given micro-service.
-#
-##############################################################################
+"""
+
+   Generic Configuration tool for Micro-Service environment discovery
+   License: MIT
+   Copyright (c) 2017 Crown Copyright (Office for National Statistics)
+
+   ONSSwagger is a wrapper for the OpenAPI spec (if there is one) for the
+   given micro-service.
+
+"""
 from pathlib import Path
 from yaml import load, dump
 

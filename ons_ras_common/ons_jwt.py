@@ -1,10 +1,10 @@
-##############################################################################
-#                                                                            #
-#   ONS Digital JWT token handling                                           #
-#   License: MIT                                                             #
-#   Copyright (c) 2017 Crown Copyright (Office for National Statistics)      #
-#                                                                            #
-##############################################################################
+"""
+
+   ONS Digital JWT token handling
+   License: MIT
+   Copyright (c) 2017 Crown Copyright (Office for National Statistics)
+
+"""
 from jose import JWTError
 from jose.jwt import encode, decode
 from datetime import datetime

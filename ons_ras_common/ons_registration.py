@@ -126,6 +126,8 @@ class ONSRegistration(object):
                 if response.code == 204:
                     self._env.logger.info('204 - Registering new routes')
                     self.register_routes()
+                elif response.code == 404:
+                    self._env.logger.info('404 - api gateway is not available')
                 elif response.code != 200:
                     self._env.logger.error('{} - UNKNOWN ERROR'.format(response.code))
                 return response

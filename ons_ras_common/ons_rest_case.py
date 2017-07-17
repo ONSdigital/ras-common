@@ -1,15 +1,12 @@
-##############################################################################
-#                                                                            #
-#   Generic Configuration tool for Micro-Service environment discovery       #
-#   License: MIT                                                             #
-#   Copyright (c) 2017 Crown Copyright (Office for National Statistics)      #
-#                                                                            #
-##############################################################################
-#
-#   ONSCase wraps routines used to access the case service
-#
-##############################################################################
+"""
 
+   Generic Configuration tool for Micro-Service environment discovery
+   License: MIT
+   Copyright (c) 2017 Crown Copyright (Office for National Statistics)
+
+   ONSCase wraps routines used to access the case service
+
+"""
 
 class ONSCase(object):
     """

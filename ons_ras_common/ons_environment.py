@@ -123,7 +123,8 @@ class ONSEnvironment(object):
         if callback:
             callback(app)
 
-        Twisted(app).run(host='0.0.0.0', port=self.flask_port, debug=False)
+        port = 8080 if self.flask_port == 443 else self.flask_port
+        Twisted(app).run(host='0.0.0.0', port=port, debug=False)
 
     def setup_ini(self):
         self._config.read(['local.ini', '../local.ini', 'config.ini', '../config.ini'])
@@ -321,4 +322,4 @@ class ONSEnvironment(object):
             else:
                 port = self.get('flask_port', self.get_free_port())
 
-        return port
+        return int(port)

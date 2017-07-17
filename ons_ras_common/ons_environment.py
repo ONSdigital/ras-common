@@ -301,7 +301,7 @@ class ONSEnvironment(object):
                 protocol = self.cf.protocol
         else:
             protocol = self.get('flask_protocol', 'http')
-        return
+        return protocol
 
     @property
     def flask_host(self):

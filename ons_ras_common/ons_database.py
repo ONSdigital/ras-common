@@ -37,7 +37,7 @@ class ONSDatabase(object):
         if not self._env.get('enable_database', False, boolean=True):
             return self._env.logger.info('Database is NOT enabled [missing "enable_database = true"]')
 
-        models_path = self._env.get('models_path', 'swagger_server/swagger/swagger.yaml')
+        models_path = self._env.get('models_path', 'swagger_server/models/_models.py')
         if not Path(models_path).is_file():
             return self._env.logger.info('unable to locate models file "{}"'.format(models_path))
 

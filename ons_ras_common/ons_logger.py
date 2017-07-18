@@ -112,7 +112,7 @@ class ONSLogger(object):
             #   Access to the stack frame is expensive, we only want to do this for debug messages
             #   or in instances where we've hit an error.
             #
-            if log_level in ['debug', 'error']:
+            if log_level in ['debug', 'info', 'error']:
                 name = _getframe(4).f_globals['__name__']
                 line = _getframe(4).f_lineno
                 file = _getframe(4).f_code.co_filename

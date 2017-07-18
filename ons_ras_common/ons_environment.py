@@ -93,7 +93,7 @@ class ONSEnvironment(object):
         """
         self.setup()
         self._registration.activate()
-        self.logger.info('Acquired listening port "{}"'.format(self._port))
+        self.logger.info('Acquired listening port "{}"'.format(self.flask_port))
         if self.swagger.has_api:
             swagger_file = '{}/{}'.format(self.swagger.path, self.swagger.file)
             if not Path(swagger_file).is_file():
@@ -123,7 +123,12 @@ class ONSEnvironment(object):
         if callback:
             callback(app)
 
-        port = 8080 if self.flask_port == 443 else self.flask_port
+        #   Sorry, flask_private is the only remotely sane way I can think of doing
+        #   this at the moment. It's a special case for endpoints in the API gateway.
+        if self.get('flask_private', False, boolean=True):
+            port = self.get('flask_port')
+        else:
+            port = 8080 if self.flask_port == 443 else self.flask_port
         Twisted(app).run(host='0.0.0.0', port=port, debug=False)
 
     def setup_ini(self):

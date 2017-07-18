@@ -12,6 +12,7 @@ class TestEnvironment(unittest.TestCase):
 
     def test_default_settings_exist(self):
         enable_database = ons_env.get('enable_database', boolean=True)
+        print(">>>", enable_database)
         self.assertFalse(enable_database)
 
         drop_database = ons_env.get('drop_database', boolean=True)

@@ -150,7 +150,9 @@ class ONSEnvironment(object):
 
         value = getenv(attribute.upper(), default=None)
         if value:
-            return value
+            if not boolean:
+                return value
+            return value.lower() in ['yes', 'true']
 
         base = self._config[section]
         return base.getboolean(attribute, default) if boolean else base.get(attribute, default)
@@ -225,7 +227,7 @@ class ONSEnvironment(object):
 
     @property
     def is_secure(self):
-        return self.get('authentication', 'true', boolean=True)
+        return self.get('authentication', True, boolean=True)
 
     @property
     def protocol(self):

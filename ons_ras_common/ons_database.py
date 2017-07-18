@@ -13,6 +13,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from pathlib import Path
 from contextlib import contextmanager
+from importlib import import_module
 
 
 class ONSDatabase(object):
@@ -25,13 +26,23 @@ class ONSDatabase(object):
         self._base = declarative_base()
         self._session = scoped_session(sessionmaker())
         self._connection = None
+        self._models_path = None
+        self._models = None
 
     def activate(self):
-        if self._env.get('enable_database', 'false').lower() not in ['true', 'yes']:
-            return self._env.logger.info('Database is NOT enabled [missing "enabled_database = true"]')
+        """
+        Initialise all the database code, we're now reading in the location of the model(s) files
+        from settings / the environment.
+        """
+        if not self._env.get('enable_database', False, boolean=True):
+            return self._env.logger.info('Database is NOT enabled [missing "enable_database = true"]')
 
-        if not self.check_paths():
-            return self._env.logger.info('[swagger_server/models/_models.py] file is missing')
+        models_path = self._env.get('models_path', 'swagger_server/swagger/swagger.yaml')
+        if not Path(models_path).is_file():
+            return self._env.logger.info('unable to locate models file "{}"'.format(models_path))
+
+        self._models_path = models_path.split('.')[0].replace('/', '.')
+        self._env.logger.info('models path is "{}"'.format(self._models_path))
 
         if not len(self._env.cf.databases):
             if not self._env.get('db_connection'):
@@ -48,17 +59,11 @@ class ONSDatabase(object):
         if self._env.drop_database:
             self.drop()
         self.create()
-
-    def check_paths(self):
-        """
-        Check our filesystem for required database files ...
-        :return: True if database environment is available
-        """
-        return Path('swagger_server/models/_models.py').is_file()
+        return True
 
     def drop(self):
         self._env.logger.info('Dropping any existing Database Tables')
-        from swagger_server.models import _models
+        self._models = import_module(self._models_path)
         schema = self._env.get('db_schema')
         if self._connection.startswith('postgres'):
             self._env.logger.info('Dropping pre-existing schema "{}" if it exists'.format(schema))
@@ -73,7 +78,7 @@ class ONSDatabase(object):
         if self._connection.startswith('postgres'):
             self._env.logger.info('Creating Database schema "{}"'.format(schema))
             self._base.metadata.schema = schema
-        from swagger_server.models import _models
+        self._models = import_module(self._models_path)
 
         if self._connection.startswith('postgres'):
             self._env.logger.info("Creating schema {} if it does't exist".format(schema))

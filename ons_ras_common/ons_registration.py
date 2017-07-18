@@ -101,15 +101,26 @@ class ONSRegistration(object):
                     if uri[-1] == '/':
                         uri = uri[:-1]
                 uri += path
-                route = {
-                    'protocol': self._env.flask_protocol,
-                    'host': self._env.flask_host,
-                    'port': self._env.flask_port,
-                    'uri': uri,
-                    'key': self._key,
-                    'ui': path == ui,
-                    'name': self._env.get('my_name', 'no local name', 'microservice')
-                }
+                if self._env.get('flask_private'):
+                    route = {
+                        'protocol': self._env.get('flask_protocol'),
+                        'host': self._env.get('flask_host'),
+                        'port': self._env.get('flask_port'),
+                        'uri': uri,
+                        'key': self._key,
+                        'ui': path == ui,
+                        'name': self._env.get('my_name', 'no local name', 'microservice')
+                    }
+                else:
+                    route = {
+                        'protocol': self._env.flask_protocol,
+                        'host': self._env.flask_host,
+                        'port': self._env.flask_port,
+                        'uri': uri,
+                        'key': self._key,
+                        'ui': path == ui,
+                        'name': self._env.get('my_name', 'no local name', 'microservice')
+                    }
                 treq.post(api_register, data={'details': dumps(route)}).addCallback(registered)
 
             return True

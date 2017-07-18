@@ -51,14 +51,12 @@ class ONSLogger(object):
             :param event: An event dict from the event service
             """
             try:
-                #log_time = event.get('log_time')
                 log_level = event.get('log_level', '')
                 log_format = event.get('log_format', '')
                 log_msg = str(log_format) if type(log_format) is dict else log_format.format(**event)
                 log_name = _getframe(4).f_globals['__name__']
                 log_line = _getframe(4).f_lineno
                 print('{}: [{}] {} @{}#{}'.format(
-                    #arrow.get(log_time).format(fmt='YYYY-MM-DDTHH:mm:ssZZ'),
                     self._log_ident,
                     log_level.name,
                     log_msg,
@@ -112,11 +110,10 @@ class ONSLogger(object):
             #   Access to the stack frame is expensive, we only want to do this for debug messages
             #   or in instances where we've hit an error.
             #
-            if log_level in ['debug', 'info', 'error']:
+            if log_level in ['debug', 'error']:
                 name = _getframe(4).f_globals['__name__']
                 line = _getframe(4).f_lineno
-                file = _getframe(4).f_code.co_filename
-                entry.append(('@', '{}#{}-{}'.format(name, line, file)))
+                entry.append(('@', '{}#{}'.format(name, line)))
             #
             #   Render the error in order so it's usable / readable in the output window
             #

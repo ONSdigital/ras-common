@@ -280,9 +280,8 @@ class ONSEnvironment(object):
     @property
     def flask_protocol(self):
         protocol = getenv('FLASK_PROTOCOL')
-        if not protocol:
-            if self.cf.detected:
-                protocol = self.cf.protocol
+        if not protocol and self.cf.detected:
+            protocol = self.cf.protocol
         else:
             protocol = self.get('flask_protocol', 'http')
         return protocol
@@ -290,20 +289,17 @@ class ONSEnvironment(object):
     @property
     def flask_host(self):
         host = getenv('FLASK_HOST')
-        if not host:
-            if self.cf.detected:
-                return self.cf.host
+        if not host and self.cf.detected:
+            return self.cf.host
         else:
-            protocol = self.get('flask_host', 'localhost')
+            host = self.get('flask_host', 'localhost')
         return host
 
     @property
     def flask_port(self):
         port = getenv('FLASK_PORT')
-        if not port:
-            if self.cf.detected:
-                port = self.cf.port
-            else:
-                port = self.get('flask_port', self.get_free_port())
-
+        if not port and self.cf.detected:
+            port = self.cf.port
+        else:
+            port = self.get('flask_port', self.get_free_port())
         return int(port)

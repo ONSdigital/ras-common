@@ -16,7 +16,7 @@ SUPPORTED_SERVICES = [SERVICE_DATABASE, SERVICE_RABBITMQ]
 
 class ONSCloudFoundry(object):
 
-    def __init__(self, env):
+    def __init__(self, env=None):
         self._env = env
         self._host = None
         self._port = None
@@ -32,8 +32,11 @@ class ONSCloudFoundry(object):
         """
         vcap_application = getenv('VCAP_APPLICATION')
         if not vcap_application:
-            return self._env.logger.info('Platform: LOCAL (no CF detected)')
-        self._env.logger.info('Platform: CLOUD FOUNDRY')
+            if self._env:
+                self._env.logger.info('Platform: LOCAL (no CF detected)')
+            return False
+        if self._env:
+            self._env.logger.info('Platform: CLOUD FOUNDRY')
         self._detected = True
         #
         #   Extract the name of the host we think we are. We need to be a little bit careful here
@@ -54,14 +57,17 @@ class ONSCloudFoundry(object):
         #
         vcap_services = getenv('VCAP_SERVICES')
         if not vcap_services:
-            return self._env.logger.info('no Cloud Foundry services detected')
+            if self._env:
+                self._env.logger.info('no Cloud Foundry services detected')
+            return False
         #
         #   Cycle through any available services and extract the ones we're interested in
         #
         vcap_services = loads(vcap_services)
         for key, services in vcap_services.items():
             if key not in SUPPORTED_SERVICES:
-                self._env.logger.info('Ignoring service "{}"'.format(key))
+                if self._env:
+                    self._env.logger.info('Ignoring service "{}"'.format(key))
                 continue
             #
             #   Handle database service entries
@@ -75,7 +81,8 @@ class ONSCloudFoundry(object):
                         creds.get('uri'),
                         creds.get('db_name')
                     )
-                    self._env.logger.info('added CF service :: {}'.format(db))
+                    if self._env:
+                        self._env.logger.info('added CF service :: {}'.format(db))
                     self._databases.append(db)
             #
             #   Handle RabbitMQ service entries
@@ -93,8 +100,10 @@ class ONSCloudFoundry(object):
                         amqp.get('vhost'),
                         service.get('name')
                     )
-                    self._env.logger.info('added CF service :: {}'.format(rabbit))
+                    if self._env:
+                        self._env.logger.info('added CF service :: {}'.format(rabbit))
                     self._rabbits.append(rabbit)
+        return True
 
     @property
     def detected(self):

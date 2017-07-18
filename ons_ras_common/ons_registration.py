@@ -75,11 +75,18 @@ class ONSRegistration(object):
                         'port': 443,
                     }
                 else:
-                    route = {
-                        'protocol': self._env.flask_protocol,
-                        'host': self._env.flask_host,
-                        'port': self._env.flask_port,
-                    }
+                    if self._env.get('flask_private'):
+                        route = {
+                            'protocol': self._env.get('flask_protocol'),
+                            'host': self._env.get('flask_host'),
+                            'port': self._env.get('flask_port'),
+                        }
+                    else:
+                        route = {
+                            'protocol': self._env.flask_protocol,
+                            'host': self._env.flask_host,
+                            'port': self._env.flask_port,
+                        }
                 route = dict(route, **{'uri': uri, 'key': self._key})
                 #self._env.logger.info('Route> {}'.format(str(route)))
                 treq.post(api_register, data={'details': dumps(route)}).addCallback(registered)

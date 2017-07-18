@@ -115,7 +115,8 @@ class ONSLogger(object):
             if log_level in ['debug', 'error']:
                 name = _getframe(4).f_globals['__name__']
                 line = _getframe(4).f_lineno
-                entry.append(('@', '{}#{}'.format(name, line)))
+                file = _getframe(4).f_code.co_filename
+                entry.append(('@', '{}#{}-{}'.format(name, line, file)))
             #
             #   Render the error in order so it's usable / readable in the output window
             #

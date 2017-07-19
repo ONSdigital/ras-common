@@ -33,6 +33,7 @@ from .ons_rest_ci import ONSCollectionInstrument
 from socket import socket, AF_INET, SOCK_STREAM
 from pathlib import Path
 from os import getcwd
+from . import __version__
 
 
 class ONSEnvironment(object):

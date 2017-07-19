@@ -41,7 +41,6 @@ class ONSRegistration(object):
         Load the routing table and kick off the recurring registration process
         """
         if not self._env.enable_registration:
-            self._env.logger.info('Registration DISABLED')
             return
         self._env.logger.info('Activating service registration')
         legacy_key = '{}:{}'.format(self._env.flask_host, self._env.flask_port)
@@ -140,6 +139,7 @@ class ONSRegistration(object):
                 self._env.api_port,
                 self._key
             )
+            self._env.logger.info('PING> {}'.format(api_ping))
 
             def check(response):
                 if response.code == 204:

@@ -96,7 +96,6 @@ class ONSEnvironment(object):
         """
         self.setup()
         self._registration.activate()
-        self.logger.info('Acquired listening port "{}"'.format(self.flask_port))
         if self.swagger.has_api:
             swagger_file = '{}/{}'.format(self.swagger.path, self.swagger.file)
             if not Path(swagger_file).is_file():
@@ -132,6 +131,8 @@ class ONSEnvironment(object):
             port = self.get('flask_port')
         else:
             port = 8080 if self.flask_port == 443 else self.flask_port
+
+        self.logger.info('starting listening port "{}"'.format(port))
         Twisted(app).run(host='0.0.0.0', port=port, debug=False)
 
     def setup_ini(self):

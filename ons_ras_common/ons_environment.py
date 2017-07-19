@@ -95,7 +95,15 @@ class ONSEnvironment(object):
         Start the ball rolling ...
         """
         self.setup()
+
+        self.logger.info('111111')
+
+
         self._registration.activate()
+
+
+        self.logger.info('2222222')
+
         if self.swagger.has_api:
             swagger_file = '{}/{}'.format(self.swagger.path, self.swagger.file)
             if not Path(swagger_file).is_file():
@@ -120,6 +128,8 @@ class ONSEnvironment(object):
             def flush_session_manager(exception):
                 self.db.session.remove()
 
+        self.logger.info('3333333')
+
         reactor.suggestThreadPoolSize(200)
         client._HTTP11ClientFactory.noisy = False
         if callback:
@@ -131,6 +141,9 @@ class ONSEnvironment(object):
             port = self.get('flask_port')
         else:
             port = 8080 if self.flask_port == 443 else self.flask_port
+
+        self.logger.info('44444444')
+
 
         self.logger.info('starting listening port "{}"'.format(port))
         Twisted(app).run(host='0.0.0.0', port=port, debug=False)

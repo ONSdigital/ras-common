@@ -92,6 +92,9 @@ class ONSEnvironment(object):
         Start the ball rolling ...
         """
         self.setup()
+
+        self.logger.info('<< RAS_COMMON version {}>>'.format(__version__))
+
         self._registration.activate()
         self.logger.info('Acquired listening port "{}"'.format(self.flask_port))
         if self.swagger.has_api:

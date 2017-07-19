@@ -52,6 +52,7 @@ class ONSEnvironment(object):
         self._api_protocol = None
         self._api_host = None
         self._api_port = None
+        self._dynamic_port = self.get_free_port()
 
         self._config = ConfigParser()
         self._config._interpolation = ExtendedInterpolation()
@@ -308,5 +309,5 @@ class ONSEnvironment(object):
         if not port and self.cf.detected:
             port = self.cf.port
         else:
-            port = self.get('flask_port', self.get_free_port())
+            port = self.get('flask_port', self._dynamic_port)
         return int(port)

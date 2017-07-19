@@ -42,10 +42,8 @@ class ONSRegistration(object):
         """
         if not self._env.enable_registration:
             return
-        self._env.logger.info('activating service registration')
         legacy_key = '{}:{}'.format(self._env.flask_host, self._env.flask_port)
         self._key = self._env.get('my_ident', legacy_key, 'microservice')
-        self._env.logger.info('starting pinger')
         LoopingCall(self.ping).start(5, now=False)
 
     def register_routes(self):

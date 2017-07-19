@@ -77,6 +77,7 @@ class ONSEnvironment(object):
         Setup the various modules, we want to call this specifically from the test routines
         as they won't want a running reactor for testing purposes ...
         """
+        self.logger.info('<< RAS_COMMON version {}>>'.format(__version__))
         self._cloudfoundry.activate()
         self._database.activate()
         self._swagger.activate()
@@ -93,9 +94,6 @@ class ONSEnvironment(object):
         Start the ball rolling ...
         """
         self.setup()
-
-        self.logger.info('<< RAS_COMMON version {}>>'.format(__version__))
-
         self._registration.activate()
         self.logger.info('Acquired listening port "{}"'.format(self.flask_port))
         if self.swagger.has_api:

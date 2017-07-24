@@ -10,10 +10,12 @@
 #   files, environment variables and anything else that pops up.
 #
 ##############################################################################
-from platform import system
-if system() == "Linux":
-    from twisted.internet import epollreactor
-    epollreactor.install()
+#from platform import system
+from crochet import no_setup
+no_setup()
+#if system() == "Linux":
+#    from twisted.internet import epollreactor
+#    epollreactor.install()
 from twisted.internet import reactor
 from twisted.web import client
 from configparser import ConfigParser, ExtendedInterpolation
@@ -30,9 +32,14 @@ from .ons_swagger import ONSSwagger
 from .ons_cryptographer import ONSCryptographer
 from .ons_registration import ONSRegistration
 from .ons_rabbit import ONSRabbit
+from .ons_asyncio import ONSAsyncIO
+from .ons_rest_case import ONSCase
+from .ons_rest_exercise import ONSExercise
+from .ons_rest_ci import ONSCollectionInstrument
 from socket import socket, AF_INET, SOCK_STREAM
 from pathlib import Path
 from os import getcwd
+
 
 class ONSEnvironment(object):
     """
@@ -68,37 +75,40 @@ class ONSEnvironment(object):
         self._jwt = ONSJwt(self)
         self._cryptography = ONSCryptographer(self)
         self._registration = ONSRegistration(self)
-
-    def info(self, text):
-        self.logger.info('[env] {}'.format(text))
+        self._asyncio = ONSAsyncIO(self)
+        self._case = ONSCase(self)
+        self._exercise = ONSExercise(self)
+        self._ci = ONSCollectionInstrument(self)
+        self.setup_ini()
+        self._logger.activate()
 
     def setup(self):
         """
         Setup the various modules, we want to call this specifically from the test routines
         as they won't want a running reactor for testing purposes ...
         """
-        self.setup_ini()
-        self._logger.activate()
         self._cloudfoundry.activate()
         self._database.activate()
         self._swagger.activate()
         self._jwt.activate()
         self._cryptography.activate()
         self._rabbit.activate()
+        self._asyncio.activate()
+        self._case.activate()
+        self._exercise.activate()
+        self._ci.activate()
 
-    def activate(self, callback=None):
+    def activate(self, callback=None, app=None):
         """
         Start the ball rolling ...
         """
         self.setup()
         self._registration.activate()
-        self.info('Acquired listening port "{}"'.format(self._port))
-
-
+        self.logger.info('Acquired listening port "{}"'.format(self._port))
         if self.swagger.has_api:
             swagger_file = '{}/{}'.format(self.swagger.path, self.swagger.file)
             if not Path(swagger_file).is_file():
-                self.info('Unable to access swagger file "{}"'.format(swagger_file))
+                self.logger.info('Unable to access swagger file "{}"'.format(swagger_file))
                 return
 
             swagger_ui = self.get('swagger_ui', 'ui')
@@ -111,8 +121,13 @@ class ONSEnvironment(object):
                 self.db.session.remove()
 
         else:
-            app = Flask(__name__)
-            CORS(app)
+            if not app:
+                app = Flask(__name__)
+                CORS(app)
+
+            @app.teardown_appcontext
+            def flush_session_manager(exception):
+                self.db.session.remove()
 
             @app.teardown_appcontext
             def flush_session_manager(exception):
@@ -124,15 +139,13 @@ class ONSEnvironment(object):
         if callback:
             callback(app)
 
-        self.logger.info("**** LAUNCH ****")
-        Twisted(app).run(host='0.0.0.0', port=self.port)
+        Twisted(app).run(host='0.0.0.0', port=self.port, debug=False)
 
     def setup_ini(self):
         self._config.read(['local.ini', '../local.ini', 'config.ini', '../config.ini'])
         self._jwt_algorithm = self.get('jwt_algorithm')
         self._jwt_secret = self.get('jwt_secret')
-        self._port = self.get('port', getenv('PORT', self.get_free_port()))
-        #self._gateway = self.get('api_host')
+        self._port = getenv('PORT', self.get('port', self.get_free_port()))
         self.api_host = self.get('api_host')
         self.api_port = self.get('api_port')
         self.api_protocol = self.get('api_protocol')
@@ -141,7 +154,7 @@ class ONSEnvironment(object):
         self.flask_protocol = self.get('flask_protocol')
         self._debug = self.get('debug', 'False').lower() in ['yes', 'true']
 
-    def get(self, attribute, default=None, section=None):
+    def get(self, attribute, default=None, section=None, boolean=False):
         """
         Recover an attribute from a section in a .INI file
 
@@ -150,11 +163,16 @@ class ONSEnvironment(object):
         :param section: An optional section name, otherwise we use the environment
         :return: The value of the attribute or 'default' if not found
         """
-        if not section:
-            section = self._env
+        section = section or self._env
         if section not in self._config:
             return default
-        return self._config[section].get(attribute, default)
+
+        value = getenv(attribute.upper(), default=None)
+        if value:
+            return value
+
+        base = self._config[section]
+        return base.getboolean(attribute, default) if boolean else base.get(attribute, default)
 
     def set(self, attribute, value):
         """
@@ -305,3 +323,23 @@ class ONSEnvironment(object):
     @property
     def debug(self):
         return self._debug
+
+    @property
+    def asyncio(self):
+        return self._asyncio
+
+    @property
+    def case_service(self):
+        return self._case
+
+    @property
+    def exercise_service(self):
+        return self._exercise
+
+    @property
+    def collection_instrument(self):
+        return self._ci
+
+    @property
+    def enable_registration(self):
+        return self.get('enable_registration', True, boolean=True)

@@ -13,6 +13,7 @@
 ##############################################################################
 from . import ons_env
 from functools import wraps
+from uuid import uuid4
 
 
 def validate_jwt(scope, request):
@@ -33,3 +34,53 @@ def validate_jwt(scope, request):
             return "Access forbidden", 403
         return authorization_required_wrapper
     return authorization_required_decorator
+
+def jwt_session(request):
+    """
+    Validate an incoming session and only proceed with a decoded session if the session is valid,
+    otherwise render the not-logged-in page.
+
+    :param request: The current request object
+    """
+    def extract_session(original_function):
+        @wraps(original_function)
+        def extract_session_wrapper(*args, **kwargs):
+            if 'authorization' in request.cookies:
+                session = ons_env.jwt.decode(request.cookies['authorization'])
+            else:
+                session = None
+            if not session:
+                return render_template('not-signed-in.html', _theme='default', data={"error": {"type": "failed"}})
+            return original_function(session)
+        return extract_session_wrapper
+    return extract_session
+    
+def _bind_request_detail_to_log(request):
+    """
+    Set up logging details for a request logger
+
+    :param request: The request object to get our data from
+    :return: None
+    """
+    ons_env.logger.logger.bind(
+        tx_id=str(uuid4()),
+        method=request.method,
+        path=request.full_path
+    )
+
+
+def before_request(request):
+    """
+    Sets up request data before a transaction.
+
+    :param request: The request object passed in
+    :return: the original_function call
+    """
+    def before_request_decorator(original_function):
+        @wraps(original_function)
+        def before_request_wrapper(*args, **kwargs):
+            if ons_env.logger.is_json:
+                _bind_request_detail_to_log(request)
+            return original_function(*args, **kwargs)
+        return before_request_wrapper
+    return before_request_decorator

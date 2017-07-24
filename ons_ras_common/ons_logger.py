@@ -55,7 +55,7 @@ class ONSLogger(object):
                 log_level = event.get('log_level', '')
                 log_format = event.get('log_format', '')
 
-                if type(log_format) is dict:
+                if 'error' in log_format:
                     print(event)
                     return
 

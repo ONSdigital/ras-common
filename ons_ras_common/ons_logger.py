@@ -54,12 +54,6 @@ class ONSLogger(object):
             try:
                 log_level = event.get('log_level', '')
                 log_format = event.get('log_format', '')
-
-                if log_level == 'error':
-                    print(event)
-                    return
-
-
                 log_msg = dumps(log_format) if type(log_format) is dict else log_format.format(**event)
                 log_name = _getframe(4).f_globals['__name__']
                 log_line = _getframe(4).f_lineno

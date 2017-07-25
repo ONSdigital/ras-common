@@ -17,7 +17,7 @@ from os import getenv
 from connexion import App
 from flask import Flask
 from flask_cors import CORS
-from flask_twisted import Twisted
+#from flask_twisted import Twisted
 from .ons_database import ONSDatabase
 from .ons_cloudfoundry import ONSCloudFoundry
 from .ons_logger import ONSLogger
@@ -138,7 +138,8 @@ class ONSEnvironment(object):
             port = 8080 if self.flask_port == 443 else self.flask_port
 
         self.logger.info('starting listening port "{}"'.format(port))
-        Twisted(app).run(host='0.0.0.0', port=port, debug=False)
+        #Twisted(app).run(host='0.0.0.0', port=port, debug=False)
+        app.run(host='0.0.0.0', port=port, debug=False)
 
     def setup_ini(self):
         self._config.read(['local.ini', '../local.ini', 'config.ini', '../config.ini'])

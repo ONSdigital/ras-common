@@ -57,13 +57,8 @@ class ONSLogger(object):
                 log_msg = dumps(log_format) if type(log_format) is dict else log_format.format(**event)
                 log_name = _getframe(4).f_globals['__name__']
                 log_line = _getframe(4).f_lineno
-                print('{}: [{}] {} @{}#{}'.format(
-                    self._log_ident,
-                    log_level.name,
-                    log_msg,
-                    log_name,
-                    log_line
-                ))
+                print('{}: [{}] {}'.format(self._log_ident, log_level.name, log_msg), end="")
+                print(' @{}#{}'.format(log_name, log_line))
             except Exception as e:
                 print(e)
 

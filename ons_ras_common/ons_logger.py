@@ -109,7 +109,7 @@ class ONSLogger(object):
             if self._log_level == logging.DEBUG or log_level == logging.ERROR:
                 name = _getframe(4).f_globals['__name__']
                 line = _getframe(4).f_lineno
-                entry.append((' @{}#{}'.format(name, line)))
+                entry.append(('@', '{}#{}'.format(name, line)))
             #
             #   Render the error in order so it's usable / readable in the output window
             #

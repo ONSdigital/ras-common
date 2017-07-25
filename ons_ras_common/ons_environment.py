@@ -94,7 +94,7 @@ class ONSEnvironment(object):
         #self._exercise.activate()
         #self._ci.activate()
 
-    def activate(self, callback=None, app=None):
+    def activate(self, callback=None, app=None, twisted=False):
         """
         Start the ball rolling ...
         """
@@ -138,7 +138,10 @@ class ONSEnvironment(object):
             port = 8080 if self.flask_port == 443 else self.flask_port
 
         self.logger.info('starting listening port "{}"'.format(port))
-        Twisted(app).run(host='0.0.0.0', port=port, debug=False)
+        if twisted:
+            Twisted(app).run(host='0.0.0.0', port=port, debug=False)
+        else:
+            app.run(host='0.0.0.0', port=port, debug=False)
 
     def setup_ini(self):
         self._config.read(['local.ini', '../local.ini', 'config.ini', '../config.ini'])

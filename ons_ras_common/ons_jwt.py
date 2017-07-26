@@ -50,19 +50,19 @@ class ONSJwt(object):
         try:
             token = self.decode(jwt_token)
         except JWTError:
-            return self._env.logger.warning('unable to decode token "{}"'.format(jwt_token))
+            return self._env.logger.error('unable to decode token "{}"'.format(jwt_token))
         #
         #   Make sure the token hasn't expired on us ...
         #
         now = datetime.now().timestamp()
         if now >= token.get('expires_at', now):
-            return self._env.logger.warning('token has expired')
+            return self._env.logger.error('token has expired')
         #
         #   See if there is an intersection between the scopes required for this endpoint
         #   end and the scopes available in the token.
         #
         if not set(scope).intersection(token.get('scope', [])):
-            return self._env.logger.warning('unable to validate scope for "{}"'.format(token))
+            return self._env.logger.error('unable to validate scope for "{}"'.format(token))
         self._env.logger.debug('validated scope for "{}"'.format(token))
         return True
 

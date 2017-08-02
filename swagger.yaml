@@ -11,6 +11,14 @@ paths:
         200: {description: status supplied}
         500: {description: server error}
       x-swagger-router-controller: skeleton.Skeleton
+  /info:
+    get:
+      description: Basic service health check
+      operationId: info
+      responses:
+        200: {description: documented info structure}
+        500: {description: server error}
+      x-swagger-router-controller: skeleton.Skeleton
 produces: [application/json]
 schemes: [http, https]
 swagger: '2.0'

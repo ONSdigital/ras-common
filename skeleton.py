@@ -12,6 +12,11 @@ from flask import request, jsonify, make_response
 class Skeleton(object):
 
     @staticmethod
+    def info():
+        return make_response(jsonify(ons_env.info))
+
+
+    @staticmethod
     def hello_world():
         #case_id = 'ab548d78-c2f1-400f-9899-79d944b87300'
         #exercise_id = '14fb3e68-4dca-46db-bf49-04b84e07e77c'

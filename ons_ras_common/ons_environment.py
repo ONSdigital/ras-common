@@ -1,13 +1,3 @@
-"""
-
-   Generic Configuration tool for Micro-Service environment discovery
-   License: MIT
-   Copyright (c) 2017 Crown Copyright (Office for National Statistics)
-
-   ONSEnvironment wraps the application environment in terms of configuration
-   files, environment variables and anything else that pops up.
-
-"""
 from crochet import no_setup
 no_setup()
 from twisted.internet import reactor
@@ -25,6 +15,7 @@ from .ons_jwt import ONSJwt
 from .ons_swagger import ONSSwagger
 from .ons_cryptographer import ONSCryptographer
 from .ons_rabbit import ONSRabbit
+from .ons_info import ONSInfo
 from socket import socket, AF_INET, SOCK_STREAM
 from pathlib import Path
 from os import getcwd
@@ -61,6 +52,7 @@ class ONSEnvironment(object):
         self._jwt = ONSJwt(self)
         self._cryptography = ONSCryptographer(self)
         self.setup_ini()
+        self._info = ONSInfo(self)
         self._logger.activate()
 
     def setup(self):
@@ -300,3 +292,7 @@ class ONSEnvironment(object):
         else:
             port = self.get('flask_port', self._dynamic_port)
         return int(port)
+
+    @property
+    def info(self):
+        return self._info.health_check

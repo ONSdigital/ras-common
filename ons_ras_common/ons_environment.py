@@ -83,10 +83,7 @@ class ONSEnvironment(object):
             app = App(__name__, specification_dir='{}/{}'.format(getcwd(), self.swagger.path))
             app.add_api(self.swagger.file, arguments={'title': self.ms_name}, swagger_url=swagger_ui)
 
-            healthcheck_file = '{}/{}'.format(self.swagger.path, 'health_check.yaml')
-            if Path(healthcheck_file).is_file():
-                app.add_api(healthcheck_file)
-
+            self.swagger.add_healthcheck(app)
             CORS(app.app)
 
             @app.app.teardown_appcontext

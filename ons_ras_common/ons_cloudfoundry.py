@@ -17,7 +17,6 @@ class ONSCloudFoundry(object):
         self._cf_env = cfenv.AppEnv()
         self._database = self._cf_env.get_service(tags='database') if self.detected else None
         self._host = self._cf_env.uris[0].split(':') if self.detected else 'localhost'
-        self._port = 443 if self.detected else 8080
         self._protocol = 'https' if self.detected else 'http'
 
     def activate(self):
@@ -33,7 +32,7 @@ class ONSCloudFoundry(object):
 
     @property
     def port(self):
-        return self._port
+        return self._cf_env.port
 
     @property
     def host(self):

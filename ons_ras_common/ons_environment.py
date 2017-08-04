@@ -111,8 +111,8 @@ class ONSEnvironment(object):
         else:
             #port = 8080 if self.flask_port == 443 else self.flask_port
             port = self.flask_port
-            self.logger.info('starting listening port "{}"'.format(port))
 
+        self.logger.info('* starting listening port "{}"'.format(port))
         if twisted:
             Twisted(app).run(host='0.0.0.0', port=port, debug=False)
         else:

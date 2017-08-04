@@ -45,3 +45,4 @@ zope.interface==4.4.1
 structlog==17.2.0
 crochet==1.6.0
 arrow==0.10.0
+cfenv==0.5.3

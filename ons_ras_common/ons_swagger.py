@@ -46,6 +46,15 @@ class ONSSwagger(object):
         #    self.rewrite_host(self._env.api_host, self._env.api_port)
         self.flush()
 
+    def add_healthcheck(self, app):
+
+        path = self._env.get('healthcheck', 'swagger_server/swagger/healthcheck.yaml')
+        if not Path(path).is_file():
+            self._env.logger.info('healthcheck NOT enabled')
+            return
+        file = path.split('/')[-1]
+        app.add_api(file)
+
     def clear_host(self):
         if self._has_api and 'host' in self._spec:
             del self._spec['host']

@@ -44,13 +44,18 @@ class ONSDatabase(object):
         self._models_path = models_path.split('.')[0].replace('/', '.')
         self._env.logger.info('models path is "{}"'.format(self._models_path))
 
-        if not len(self._env.cf.databases):
-            if not self._env.get('db_connection'):
-                return self._env.logger.info('no databases available')
-            else:
-                self._connection = self._env.get('db_connection')
+        if self._env.cf.detected:
+            self._connection = self._env.cf.url
         else:
-            self._connection = self._env.cf.databases[0].uri
+            self._connection = self._env.get('db_connection')
+
+        #if not len(self._env.cf.databases):
+        #    if not self._env.get('db_connection'):
+        #        return self._env.logger.info('no databases available')
+        #    else:
+        #        self._connection = self._env.get('db_connection')
+        #else:
+        #    self._connection = self._env.cf.databases[0].uri
 
         self._env.logger.info('Database connection is "{}"'.format(self._connection))
         self._engine = create_engine(self._connection, convert_unicode=True)

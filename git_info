@@ -1,0 +1,7 @@
+{
+"origin": "https://github.com/ONSdigital/ras-api-gateway.git",
+"commit": "6cdf47fb9944a7688846f5565f722fb2d59ab6c7",
+"branch": "origin/TBL063/health_check",
+"name": "RAS Test API Gateway",
+"built": "2017-08-02T14:51:03Z"
+}

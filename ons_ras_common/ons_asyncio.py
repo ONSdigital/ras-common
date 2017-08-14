@@ -1,14 +1,12 @@
-##############################################################################
-#                                                                            #
-#   Generic ASYNC IO Routines for accessing remote REST endpoints            #
-#   License: MIT                                                             #
-#   Copyright (c) 2017 Crown Copyright (Office for National Statistics)      #
-#                                                                            #
-##############################################################################
-#
-#   ONSAsyncIO wraps generic endpoint access routines
-#
-##############################################################################
+"""
+
+   Generic ASYNC IO Routines for accessing remote REST endpoints
+   License: MIT
+   Copyright (c) 2017 Crown Copyright (Office for National Statistics)
+
+   ONSAsyncIO wraps generic endpoint access routines
+
+"""
 import crochet
 import treq
 from json import loads, dumps, decoder

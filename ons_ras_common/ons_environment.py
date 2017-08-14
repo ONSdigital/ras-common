@@ -1,21 +1,15 @@
-##############################################################################
-#                                                                            #
-#   Generic Configuration tool for Micro-Service environment discovery       #
-#   License: MIT                                                             #
-#   Copyright (c) 2017 Crown Copyright (Office for National Statistics)      #
-#                                                                            #
-##############################################################################
-#
-#   ONSEnvironment wraps the application environment in terms of configuration
-#   files, environment variables and anything else that pops up.
-#
-##############################################################################
-#from platform import system
+"""
+
+   Generic Configuration tool for Micro-Service environment discovery
+   License: MIT
+   Copyright (c) 2017 Crown Copyright (Office for National Statistics)
+
+   ONSEnvironment wraps the application environment in terms of configuration
+   files, environment variables and anything else that pops up.
+
+"""
 from crochet import no_setup
 no_setup()
-#if system() == "Linux":
-#    from twisted.internet import epollreactor
-#    epollreactor.install()
 from twisted.internet import reactor
 from twisted.web import client
 from configparser import ConfigParser, ExtendedInterpolation
@@ -30,21 +24,15 @@ from .ons_logger import ONSLogger
 from .ons_jwt import ONSJwt
 from .ons_swagger import ONSSwagger
 from .ons_cryptographer import ONSCryptographer
-from .ons_registration import ONSRegistration
 from .ons_rabbit import ONSRabbit
-from .ons_asyncio import ONSAsyncIO
-from .ons_rest_case import ONSCase
-from .ons_rest_exercise import ONSExercise
-from .ons_rest_ci import ONSCollectionInstrument
 from socket import socket, AF_INET, SOCK_STREAM
 from pathlib import Path
 from os import getcwd
+from . import __version__
 
 
 class ONSEnvironment(object):
-    """
 
-    """
     def __init__(self):
         """
         Setup access to ini files and the environment based on the environment
@@ -56,12 +44,10 @@ class ONSEnvironment(object):
         self._host = None
         self._gateway = None
         self._debug = None
-        self.api_protocol = None
-        self.api_host = None
-        self.api_port = None
-        self.flask_protocol = None
-        self.flask_host = None
-        self.flask_port = None
+        self._api_protocol = None
+        self._api_host = None
+        self._api_port = None
+        self._dynamic_port = self.get_free_port()
 
         self._config = ConfigParser()
         self._config._interpolation = ExtendedInterpolation()
@@ -74,11 +60,6 @@ class ONSEnvironment(object):
         self._swagger = ONSSwagger(self)
         self._jwt = ONSJwt(self)
         self._cryptography = ONSCryptographer(self)
-        self._registration = ONSRegistration(self)
-        self._asyncio = ONSAsyncIO(self)
-        self._case = ONSCase(self)
-        self._exercise = ONSExercise(self)
-        self._ci = ONSCollectionInstrument(self)
         self.setup_ini()
         self._logger.activate()
 
@@ -87,24 +68,19 @@ class ONSEnvironment(object):
         Setup the various modules, we want to call this specifically from the test routines
         as they won't want a running reactor for testing purposes ...
         """
+        self.logger.info('<< RAS_COMMON version {}>>'.format(__version__))
         self._cloudfoundry.activate()
         self._database.activate()
         self._swagger.activate()
         self._jwt.activate()
         self._cryptography.activate()
         self._rabbit.activate()
-        self._asyncio.activate()
-        self._case.activate()
-        self._exercise.activate()
-        self._ci.activate()
 
-    def activate(self, callback=None, app=None):
+    def activate(self, callback=None, app=None, twisted=False):
         """
         Start the ball rolling ...
         """
         self.setup()
-        self._registration.activate()
-        self.logger.info('Acquired listening port "{}"'.format(self._port))
         if self.swagger.has_api:
             swagger_file = '{}/{}'.format(self.swagger.path, self.swagger.file)
             if not Path(swagger_file).is_file():
@@ -129,30 +105,32 @@ class ONSEnvironment(object):
             def flush_session_manager(exception):
                 self.db.session.remove()
 
-            @app.teardown_appcontext
-            def flush_session_manager(exception):
-                self.logger.info("Flush")
-                self.db.session.remove()
-
         reactor.suggestThreadPoolSize(200)
         client._HTTP11ClientFactory.noisy = False
         if callback:
             callback(app)
 
-        Twisted(app).run(host='0.0.0.0', port=self.port, debug=False)
+        #   Sorry, flask_private is the only remotely sane way I can think of doing
+        #   this at the moment. It's a special case for endpoints in the API gateway.
+        if self.get('flask_private', False, boolean=True):
+            port = self.get('flask_port')
+        else:
+            port = 8080 if self.flask_port == 443 else self.flask_port
+
+        self.logger.info('starting listening port "{}"'.format(port))
+        if twisted:
+            Twisted(app).run(host='0.0.0.0', port=port, debug=False)
+        else:
+            app.run(host='0.0.0.0', port=port, debug=False)
 
     def setup_ini(self):
         self._config.read(['local.ini', '../local.ini', 'config.ini', '../config.ini'])
         self._jwt_algorithm = self.get('jwt_algorithm')
         self._jwt_secret = self.get('jwt_secret')
-        self._port = getenv('PORT', self.get('port', self.get_free_port()))
-        self.api_host = self.get('api_host')
-        self.api_port = self.get('api_port')
-        self.api_protocol = self.get('api_protocol')
-        self.flask_host = self.get('flask_host')
-        self.flask_port = self.get('flask_port', self._port)
-        self.flask_protocol = self.get('flask_protocol')
-        self._debug = self.get('debug', 'False').lower() in ['yes', 'true']
+        self._api_host = self.get('api_host')
+        self._api_port = self.get('api_port')
+        self._api_protocol = self.get('api_protocol')
+        self._debug = self.get('debug', 'False', boolean=True)
 
     def get(self, attribute, default=None, section=None, boolean=False):
         """
@@ -169,7 +147,9 @@ class ONSEnvironment(object):
 
         value = getenv(attribute.upper(), default=None)
         if value:
-            return value
+            if not boolean:
+                return value
+            return value.lower() in ['yes', 'true']
 
         base = self._config[section]
         return base.getboolean(attribute, default) if boolean else base.get(attribute, default)
@@ -195,25 +175,8 @@ class ONSEnvironment(object):
         return self.get('drop_database', 'false').lower() in ['yes', 'true']
 
     @property
-    def port(self):
-        return int(self._port)
-
-    @port.setter
-    def port(self, value):
-        self._port = value
-
-    @property
     def host(self):
         return self._host if self._host else 'localhost'
-
-    @host.setter
-    def host(self, value):
-        self._host = value
-
-    @property
-    def gateway(self):
-        #return self._gateway
-        return self.api_host
 
     @property
     def db(self):
@@ -261,60 +224,27 @@ class ONSEnvironment(object):
 
     @property
     def is_secure(self):
-        return self.get('authentication', 'true').lower() in ['yes', 'true']
+        return self.get('authentication', True, boolean=True)
 
     @property
     def protocol(self):
-        #return self.get('api_protocol', 'http')
         return self.api_protocol
 
     @property
     def api_protocol(self):
         return self._api_protocol
 
-    @api_protocol.setter
-    def api_protocol(self, value):
-        self._api_protocol = value
-
     @property
     def api_host(self):
         return self._api_host
 
-    @api_host.setter
-    def api_host(self, value):
-        self._api_host = value
+    @property
+    def gateway(self):
+        return self.api_host
 
     @property
     def api_port(self):
         return self._api_port
-
-    @api_port.setter
-    def api_port(self, value):
-        self._api_port = value
-
-    @property
-    def flask_protocol(self):
-        return self._flask_protocol
-
-    @flask_protocol.setter
-    def flask_protocol(self, value):
-        self._flask_protocol = value
-
-    @property
-    def flask_host(self):
-        return self._flask_host
-
-    @flask_host.setter
-    def flask_host(self, value):
-        self._flask_host = value
-
-    @property
-    def flask_port(self):
-        return self._flask_port
-
-    @flask_port.setter
-    def flask_port(self, value):
-        self._flask_port = value
 
     @property
     def rabbit(self):
@@ -324,22 +254,49 @@ class ONSEnvironment(object):
     def debug(self):
         return self._debug
 
-    @property
-    def asyncio(self):
-        return self._asyncio
+    #@property
+    #def asyncio(self):
+    #    return self._asyncio
+
+    #@property
+    #def case_service(self):
+    #    return self._case
+
+    #@property
+    #def exercise_service(self):
+    #    return self._exercise
+
+    #@property
+    #def collection_instrument(self):
+    #    return self._ci
+
+    #@property
+    #def enable_registration(self):
+    #    return self.get('enable_registration', True, boolean=True)
 
     @property
-    def case_service(self):
-        return self._case
+    def flask_protocol(self):
+        protocol = getenv('FLASK_PROTOCOL')
+        if not protocol and self.cf.detected:
+            protocol = self.cf.protocol
+        else:
+            protocol = self.get('flask_protocol', 'http')
+        return protocol
 
     @property
-    def exercise_service(self):
-        return self._exercise
+    def flask_host(self):
+        host = getenv('FLASK_HOST')
+        if not host and self.cf.detected:
+            return self.cf.host
+        else:
+            host = self.get('flask_host', 'localhost')
+        return host
 
     @property
-    def collection_instrument(self):
-        return self._ci
-
-    @property
-    def enable_registration(self):
-        return self.get('enable_registration', True, boolean=True)
+    def flask_port(self):
+        port = getenv('FLASK_PORT')
+        if not port and self.cf.detected:
+            port = self.cf.port
+        else:
+            port = self.get('flask_port', self._dynamic_port)
+        return int(port)

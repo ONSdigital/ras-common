@@ -1,10 +1,10 @@
-##############################################################################
-#                                                                            #
-#   ONS Digital JWT token handling                                           #
-#   License: MIT                                                             #
-#   Copyright (c) 2017 Crown Copyright (Office for National Statistics)      #
-#                                                                            #
-##############################################################################
+"""
+
+   ONS Digital JWT token handling
+   License: MIT
+   Copyright (c) 2017 Crown Copyright (Office for National Statistics)
+
+"""
 from jose import JWTError
 from jose.jwt import encode, decode
 from datetime import datetime
@@ -23,12 +23,6 @@ class ONSJwt(object):
         """
         self._algorithm = self._env.get('jwt_algorithm', None)
         self._secret = self._env.get('jwt_secret', None)
-
-    def debug(self, text):
-        self._env.logger.debug('[jwt] {}'.format(text))
-
-    def warn(self, text):
-        self._env.logger.warn('[jwt] {}'.format(text))
 
     def encode(self, data):
         """
@@ -53,24 +47,23 @@ class ONSJwt(object):
         :param jwt_token: The incoming request object
         :return: Token is value, True or False
         """
-        self.debug('validating token "{}" for scope "{}"'.format(jwt_token, scope))
         try:
             token = self.decode(jwt_token)
         except JWTError:
-            return self.warn('unable to decode token "{}"'.format(jwt_token))
+            return self._env.logger.error('unable to decode token "{}"'.format(jwt_token))
         #
         #   Make sure the token hasn't expired on us ...
         #
         now = datetime.now().timestamp()
         if now >= token.get('expires_at', now):
-            return self.warn('token has expired "{}"'.format(token))
+            return self._env.logger.error('token has expired')
         #
         #   See if there is an intersection between the scopes required for this endpoint
         #   end and the scopes available in the token.
         #
         if not set(scope).intersection(token.get('scope', [])):
-            return self.warn('unable to validate scope for "{}"'.format(token))
-        self.debug('validated scope for "{}"'.format(token))
+            return self._env.logger.error('unable to validate scope for "{}"'.format(token))
+        self._env.logger.debug('validated scope for "{}"'.format(token))
         return True
 
     @property

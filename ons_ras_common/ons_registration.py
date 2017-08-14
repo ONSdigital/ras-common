@@ -1,20 +1,18 @@
-##############################################################################
-#                                                                            #
-#   Generic Configuration tool for Micro-Service environment discovery       #
-#   License: MIT                                                             #
-#   Copyright (c) 2017 Crown Copyright (Office for National Statistics)      #
-#                                                                            #
-##############################################################################
-#
-#   ONSRegistration takes care of registering the Micro-service with the
-#   RAS API gateway, and in future any other gateways involved in platform
-#   provisioning.
-#
-##############################################################################
+"""
+
+   Generic Configuration tool for Micro-Service environment discovery
+   License: MIT
+   Copyright (c) 2017 Crown Copyright (Office for National Statistics)
+
+
+   ONSRegistration takes care of registering the Micro-service with the
+   RAS API gateway, and in future any other gateways involved in platform
+   provisioning.
+
+"""
 from json import dumps
 from twisted.internet.defer import inlineCallbacks
 from twisted.internet.task import LoopingCall
-from twisted.internet import reactor
 import urllib3
 import requests
 import treq
@@ -38,23 +36,12 @@ class ONSRegistration(object):
         self._state = False
         self._key = None
 
-    def log(self, text):
-        self._env.logger.info('[reg] {}'.format(text))
-
-    def info(self, text):
-        self._env.logger.info('[reg] [info] {}'.format(text))
-
-    def warn(self, text):
-        self._env.logger.warn('[reg] [warning] {}'.format(text))
-
-    def error(self, text):
-        self._env.logger.warn('[reg] [error] {}'.format(text))
-
     def activate(self):
         """
         Load the routing table and kick off the recurring registration process
         """
-        self.log('Activating service registration')
+        if not self._env.enable_registration:
+            return
         legacy_key = '{}:{}'.format(self._env.flask_host, self._env.flask_port)
         self._key = self._env.get('my_ident', legacy_key, 'microservice')
         LoopingCall(self.ping).start(5, now=False)
@@ -68,7 +55,7 @@ class ONSRegistration(object):
         def registered(response):
             if response.code != 200:
                 text = yield response.text()
-                self.error('{} {}'.format(response.code, text))
+                self._env.logger.error('{} {}'.format(response.code, text))
 
         try:
             api_register = '{}://{}:{}/api/1.0.0/register'.format(
@@ -87,13 +74,20 @@ class ONSRegistration(object):
                         'port': 443,
                     }
                 else:
-                    route = {
-                        'protocol': self._env.flask_protocol,
-                        'host': self._env.flask_host,
-                        'port': self._env.flask_port,
-                    }
+                    if self._env.get('flask_private'):
+                        route = {
+                            'protocol': self._env.get('flask_protocol'),
+                            'host': self._env.get('flask_host'),
+                            'port': self._env.get('flask_port'),
+                        }
+                    else:
+                        route = {
+                            'protocol': self._env.flask_protocol,
+                            'host': self._env.flask_host,
+                            'port': self._env.flask_port,
+                        }
                 route = dict(route, **{'uri': uri, 'key': self._key})
-                self._env.logger.info('Route> {}'.format(str(route)))
+                #self._env.logger.info('Route> {}'.format(str(route)))
                 treq.post(api_register, data={'details': dumps(route)}).addCallback(registered)
 
             swagger_paths = ['/ui/css', '/ui/lib', '/ui/images', '/swagger.json']
@@ -106,20 +100,31 @@ class ONSRegistration(object):
                     if uri[-1] == '/':
                         uri = uri[:-1]
                 uri += path
-                route = {
-                    'protocol': self._env.flask_protocol,
-                    'host': self._env.flask_host,
-                    'port': self._env.flask_port,
-                    'uri': uri,
-                    'key': self._key,
-                    'ui': path == ui,
-                    'name': self._env.get('my_name', 'no local name', 'microservice')
-                }
+                if self._env.get('flask_private'):
+                    route = {
+                        'protocol': self._env.get('flask_protocol'),
+                        'host': self._env.get('flask_host'),
+                        'port': self._env.get('flask_port'),
+                        'uri': uri,
+                        'key': self._key,
+                        'ui': path == ui,
+                        'name': self._env.get('my_name', 'no local name', 'microservice')
+                    }
+                else:
+                    route = {
+                        'protocol': self._env.flask_protocol,
+                        'host': self._env.flask_host,
+                        'port': self._env.flask_port,
+                        'uri': uri,
+                        'key': self._key,
+                        'ui': path == ui,
+                        'name': self._env.get('my_name', 'no local name', 'microservice')
+                    }
                 treq.post(api_register, data={'details': dumps(route)}).addCallback(registered)
 
             return True
         except Exception as e:
-            self.warn("++++++ ERROR: {}".format(str(e)))
+            self._env.logger.error('error registering routes "{}"'.format(str(e)))
 
     def ping(self):
         """
@@ -133,18 +138,28 @@ class ONSRegistration(object):
                 self._env.api_port,
                 self._key
             )
+            self._env.logger.info('PING> {}'.format(api_ping))
 
-            def status_check(response):
+            def check(response):
                 if response.code == 204:
-                    self.info('204 - Registering new routes')
+                    self._env.logger.info('204 - Registering new routes')
                     self.register_routes()
+                elif response.code == 404:
+                    self._env.logger.info('404 - api gateway is not available')
                 elif response.code != 200:
-                    self.error('{} - UNKNOWN ERROR'.format(response.code))
+                    self._env.logger.error('{} - UNKNOWN ERROR'.format(response.code))
                 return response
 
-            treq.get(api_ping).addCallback(status_check)
+            def log(failure):
+                """
+                Just log the error, a return code of 'False' will be returned elsewhere
+                :param failure: A treq failure object
+                """
+                return self._env.logger.warning('[ping] {}'.format(failure.getErrorMessage()))
+
+            treq.get(api_ping).addCallback(check).addErrback(log)
 
         except requests.exceptions.ConnectionError as e:
-            self.log('ping failed for "{}"'.format(api_ping))
-            self.log('ping return = "{}"'.format(e.args[0].reason))
+            self._env.logger.warning('ping failed for "{}"'.format(api_ping))
+            self._env.logger.warning('ping return = "{}"'.format(e.args[0].reason))
             self._state = False

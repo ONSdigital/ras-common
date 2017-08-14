@@ -126,13 +126,32 @@ Rather than *activate*.
 
 When you have a change you wish to publish, follow these steps;
 
-1. Update the version listed in setup.py
-2. Update the version listed in ons_ras_common/__init__.py
-3. Type "make"
-4. git commit -a -m "(version number)" && git push
+1. Update the version listed in ons_ras_common/__init__.py
+2. Type "make"
+3. git commit -a -m "(version number)" && git push
 
 Don't forget to put a comment in *CHANGELOG.md* detailing the change.
 
+## Expected startup logging
+
+```$ LOG_FORMAT=text ./scripts/run.sh
+2017-07-14T07:11:55+00:00 ras-common: [info] Platform: LOCAL (no CF detected) @ons_ras_common.ons_cloudfoundry#33
+2017-07-14T07:11:55+00:00 ras-common: [info] Database is NOT enabled [missing "enable_database = true"] @ons_ras_common.ons_database#45
+2017-07-14T07:11:55+00:00 ras-common: [info] Swagger API has been detected @ons_ras_common.ons_swagger#34
+2017-07-14T07:11:55+00:00 ras-common: [info] Setting PORT to 8080 @ons_ras_common.ons_swagger#45
+2017-07-14T07:11:55+00:00 ras-common: [info] Updating host to: localhost:8080 @ons_ras_common.ons_swagger#63
+2017-07-14T07:11:55+00:00 ras-common: [info] Swagger API updated @ons_ras_common.ons_swagger#73
+2017-07-14T07:11:55+00:00 ras-common: [info] Setting crypto key to "ONS_DUMMY_KEY" @ons_ras_common.ons_cryptographer#33
+2017-07-14T07:11:55+00:00 ras-common: [info] Queue "local_rabbit" user="guest" pass="guest" host="localhost" port="15672" @ons_ras_common.ons_rabbit#49
+2017-07-14T07:11:55+00:00 ras-common: [info] Acquired listening port "8001" @ons_ras_common.ons_environment#107
+2017-07-14T07:11:55+00:00 ras-common: [info] Site starting on 8001 @twisted.python.log#286
+2017-07-14T07:11:55+00:00 ras-common: [info] Starting factory <twisted.web.server.Site object at 0x7f3b566d0ac8> @twisted.logger._logger#210
+^C
+2017-07-14T07:12:06+00:00 ras-common: [info] Received SIGINT, shutting down. @twisted.python.log#286
+2017-07-14T07:12:06+00:00 ras-common: [info] (TCP Port 8001 Closed) @twisted.python.log#286
+2017-07-14T07:12:06+00:00 ras-common: [info] Stopping factory <twisted.web.server.Site object at 0x7f3b566d0ac8> @twisted.logger._logger#210
+2017-07-14T07:12:06+00:00 ras-common: [info] Main loop terminated. @twisted.python.log#286
+```
 
 ## Example
 
@@ -169,3 +188,4 @@ Type "help", "copyright", "credits" or "license" for more information.
 2017-06-21 08:43:29+0100 [-] Site starting on 33751
 2017-06-21 08:43:29+0100 [-] Starting factory <twisted.web.server.Site object at 0x7ff6ab840d30>
 ```
+

@@ -1,20 +1,18 @@
-##############################################################################
-#                                                                            #
-#   Generic Configuration tool for Micro-Service environment discovery       #
-#   License: MIT                                                             #
-#   Copyright (c) 2017 Crown Copyright (Office for National Statistics)      #
-#                                                                            #
-##############################################################################
-#
-#   ONSLogger is a generic logging module, ultimately this will be converted
-#   to output JSON format, but for now it's a simple syslog style output.
-#
-##############################################################################
+"""
+
+   Generic Configuration tool for Micro-Service environment discovery
+   License: MIT
+   Copyright (c) 2017 Crown Copyright (Office for National Statistics)
+
+   ONSLogger is a generic logging module, ultimately this will be converted
+   to output JSON format, but for now it's a simple syslog style output.
+
+"""
 import logging
 import datetime
 import sys
 import structlog
-import time
+
 
 LEVELS = {'debug': logging.DEBUG,
           'info': logging.INFO,
@@ -73,7 +71,7 @@ class ONSLogger(object):
             wrapper_class=structlog.stdlib.BoundLogger,
             cache_logger_on_first_use=True
         )
-        self.info('Logger activated', environment=self._env.environment)
+        #self.info('Logger activated', environment=self._env.environment)
 
     def info(self, *args, **kwargs):
         if self._log_format == 'text':
@@ -81,6 +79,7 @@ class ONSLogger(object):
             self.logger.info('{} {}'.format(datetime.datetime.now().isoformat(), text))
         else:
             self.logger.info(*args, **kwargs)
+        return False
 
     def debug(self, *args, **kwargs):
         if self._log_format == 'text':
@@ -88,6 +87,7 @@ class ONSLogger(object):
             self.logger.debug('{} {}'.format(datetime.datetime.now().isoformat(), text))
         else:
             self.logger.debug(*args, **kwargs)
+        return False
 
     def warn(self, *args, **kwargs):
         if self._log_format == 'text':
@@ -95,6 +95,7 @@ class ONSLogger(object):
             self.logger.warning('{} {}'.format(datetime.datetime.now().isoformat(), text))
         else:
             self.logger.warning(*args, **kwargs)
+        return False
 
     def error(self, *args, **kwargs):
         if self._log_format == 'text':
@@ -102,6 +103,7 @@ class ONSLogger(object):
             self.logger.error('{} {}'.format(datetime.datetime.now().isoformat(), text))
         else:
             self.logger.error(*args, **kwargs)
+        return False
 
     def critical(self, *args, **kwargs):
         if self._log_format == 'text':
@@ -109,30 +111,9 @@ class ONSLogger(object):
             self.logger.critical('{} {}'.format(datetime.datetime.now().isoformat(), text))
         else:
             self.logger.critical(*args, **kwargs)
-
-    def exception(self, *args, **kwargs):
-        if self._log_format == 'text':
-            text = '{} {}'.format(str(args).strip('()').strip(',').strip("'"), str(kwargs))
-            self.logger.exception('{} {}'.format(datetime.datetime.now().isoformat(), text))
-        else:
-            self.logger.exception(*args, **kwargs)
+        return False
 
     @property
     def is_json(self):
         return self._is_json
-
-#    from sys import _getframe
-#    from logging import WARN, INFO, ERROR
-
-#    def report(self, lvl, msg):
-#        """
-#        Report an issue to the external logging infrastructure
-#        :param lvl: The log level we're outputting to
-#        :param msg: The message we want to log
-#        :return:
-#        """
-#        line = _getframe(1).f_lineno
-#        name = _getframe(1).f_code.co_name
-#        self._env.logger.info("{}:{}: #{} - {}".format(lvl, name, line, msg))
-#        return False
 

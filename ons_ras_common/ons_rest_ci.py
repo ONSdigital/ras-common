@@ -1,15 +1,14 @@
-##############################################################################
-#                                                                            #
-#   Generic Routines for access to the collection instruments service        #
-#   License: MIT                                                             #
-#   Copyright (c) 2017 Crown Copyright (Office for National Statistics)      #
-#                                                                            #
-##############################################################################
-#
-#   ONSCollectionInstrument wraps access to the CI service
-#
-##############################################################################
+"""
+
+   Generic Routines for access to the collection instruments service
+   License: MIT
+   Copyright (c) 2017 Crown Copyright (Office for National Statistics)
+
+   ONSCollectionInstrument wraps access to the CI service
+
+"""
 from os import getenv
+
 
 class ONSCollectionInstrument(object):
     """

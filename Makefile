@@ -1,7 +1,8 @@
-VERSION=`python3 -c "import ons_ras_common; print(ons_ras_common.__version__)"`
+VERSION=`python3 -c "from ons_ras_common.ons_version import __version__; print(__version__)"`
 
 all:
 	@echo "Current version is: $(VERSION)"
+	@echo "__version__= \"${VERSION}\"" > version.py
 	@rm -f dist/*
 	@python3 setup.py sdist
 	@python3 setup.py bdist_wheel

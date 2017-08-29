@@ -31,6 +31,9 @@ class ONSEnvironment(object):
         """
         self._jwt_algorithm = None
         self._jwt_secret = None
+        self._security_user_name = None
+        self._security_user_password = None
+        self._security_realm = None
         self._port = None
         self._host = None
         self._gateway = None
@@ -69,9 +72,6 @@ class ONSEnvironment(object):
         self._rabbit.activate()
 
     def activate(self, callback=None, app=None, twisted=False):
-        """
-        Start the ball rolling ...
-        """
         self.setup()
         if self.swagger.has_api:
             swagger_file = '{}/{}'.format(self.swagger.path, self.swagger.file)
@@ -87,7 +87,7 @@ class ONSEnvironment(object):
             CORS(app.app)
 
             @app.app.teardown_appcontext
-            def flush_session_manager(exception):
+            def flush_session_manager(_):
                 self.db.session.remove()
 
         else:
@@ -96,7 +96,7 @@ class ONSEnvironment(object):
                 CORS(app)
 
             @app.teardown_appcontext
-            def flush_session_manager(exception):
+            def flush_session_manager(_):
                 self.db.session.remove()
 
         reactor.suggestThreadPoolSize(200)
@@ -109,19 +109,23 @@ class ONSEnvironment(object):
         if self.get('flask_private', False, boolean=True):
             port = self.get('flask_port')
         else:
-            #port = 8080 if self.flask_port == 443 else self.flask_port
             port = self.flask_port
 
         self.logger.info('* starting listening port "{}"'.format(port))
         if twisted:
+            self.logger.info('* starting Twisted WSGI server')
             Twisted(app).run(host='0.0.0.0', port=port, debug=False)
         else:
+            self.logger.info('* starting Flask dev server')
             app.run(host='0.0.0.0', port=port, debug=False)
 
     def setup_ini(self):
         self._config.read(['local.ini', '../local.ini', 'config.ini', '../config.ini'])
         self._jwt_algorithm = self.get('jwt_algorithm')
         self._jwt_secret = self.get('jwt_secret')
+        self._security_user_name = self.get('security_user_name')
+        self._security_user_password = self.get('security_user_password')
+        self._security_realm = self.get('security_realm')
         self._api_host = self.get('api_host')
         self._api_port = self.get('api_port')
         self._api_protocol = self.get('api_protocol')
@@ -158,7 +162,8 @@ class ONSEnvironment(object):
         """
         self._config[self._env][attribute] = value
 
-    def get_free_port(self):
+    @staticmethod
+    def get_free_port():
         sock = socket(AF_INET, SOCK_STREAM)
         sock.bind(('localhost', 0))
         _, port = sock.getsockname()
@@ -206,6 +211,18 @@ class ONSEnvironment(object):
         return self._jwt_secret
 
     @property
+    def security_user_name(self):
+        return self._security_user_name
+
+    @property
+    def security_user_password(self):
+        return self._security_user_password
+
+    @property
+    def security_realm(self):
+        return self._security_realm
+
+    @property
     def jwt(self):
         return self._jwt
 
@@ -248,26 +265,6 @@ class ONSEnvironment(object):
     @property
     def debug(self):
         return self._debug
-
-    #@property
-    #def asyncio(self):
-    #    return self._asyncio
-
-    #@property
-    #def case_service(self):
-    #    return self._case
-
-    #@property
-    #def exercise_service(self):
-    #    return self._exercise
-
-    #@property
-    #def collection_instrument(self):
-    #    return self._ci
-
-    #@property
-    #def enable_registration(self):
-    #    return self.get('enable_registration', True, boolean=True)
 
     @property
     def flask_protocol(self):

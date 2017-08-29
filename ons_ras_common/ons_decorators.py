@@ -43,6 +43,7 @@ def validate_jwt(scope, request, on_error=None):
         return authorization_required_wrapper
     return authorization_required_decorator
 
+
 def jwt_session(request):
     """
     Validate an incoming session and only proceed with a decoded session if the session is valid,
@@ -84,6 +85,7 @@ def before_request(request):
     :return: the original_function call
     """
 
+    # TODO: what's the point of this decorator? With the commented-out code, it doesn't do anything!
     def before_request_decorator(original_function):
         @wraps(original_function)
         def before_request_wrapper(*args, **kwargs):

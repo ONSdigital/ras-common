@@ -76,23 +76,3 @@ def _bind_request_detail_to_log(request):
         method=request.method,
         path=request.full_path
     )
-
-
-def before_request(request):
-    """
-    Sets up request data before a transaction.
-    :param request: The request object passed in
-    :return: the original_function call
-    """
-
-    # TODO: what's the point of this decorator? With the commented-out code, it doesn't do anything!
-    def before_request_decorator(original_function):
-        @wraps(original_function)
-        def before_request_wrapper(*args, **kwargs):
-            #if ons_env.logger.is_json:
-            #    _bind_request_detail_to_log(request)
-            return original_function(*args, **kwargs)
-
-        return before_request_wrapper
-
-    return before_request_decorator

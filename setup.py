@@ -19,7 +19,7 @@ here = path.abspath(path.dirname(__file__))
 with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = f.read()
 
-from version import __version__
+version = '0.3.0'
 
 setup(
     name='ons_ras_common',
@@ -27,7 +27,7 @@ setup(
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version=__version__,
+    version=version,
 
     description='The Common library for ONS RAS Micro-Services',
     long_description="""

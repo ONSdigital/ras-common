@@ -17,6 +17,7 @@ from twisted.internet import defer
 DEFAULT_TIMEOUT = 3
 TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 
+
 class ONSAsyncIO(object):
     """
     Provide a single point of entry for AsyncIO routines which provides a single
@@ -93,7 +94,11 @@ class ONSAsyncIO(object):
 
         # Invoke a Twisted pipeline to hit the endpoint and process the results
         url = '{}{}'.format(self.get_base(endpoint), endpoint)
-        return treq.get(url, params=params).addCallback(check).addCallback(treq.content).addCallback(json).addErrback(log)
+        auth = (self._env.security_user_name, self._env.security_user_password)
+        return treq.get(url, auth=auth, params=params)\
+            .addCallback(check).addCallback(treq.content)\
+            .addCallback(json)\
+            .addErrback(log)
 
     @crochet.run_in_reactor
     def post_route(self, endpoint, payload):
@@ -119,9 +124,11 @@ class ONSAsyncIO(object):
             return response.code, msg
 
         url = '{}{}'.format(self.get_base(endpoint), endpoint)
+        auth = (self._env.security_user_name, self._env.security_user_password)
         return treq.post(
             url,
             dumps(payload).encode('ascii'),
+            auth=auth,
             headers={b'Content-Type': [b'application/json']}
         ).addCallback(check)
 
@@ -153,7 +160,7 @@ class ONSAsyncIO(object):
             :param response: A deferred response object
             :return: A deferred response object
             """
-            def on_error(failure, response):
+            def on_error(failure, _):
                 self._env.logger.error('error uploading file "{}"'.format(failure))
                 raise Exception('exception uploading file')
 
@@ -166,7 +173,9 @@ class ONSAsyncIO(object):
             return False
 
         url = '{}{}/{}'.format(self.get_base(endpoint), endpoint, case_id)
+        self._env.logger.info("Posting to {}".format(url))
         files = {'file': (upload_file.filename, upload_file.stream)}
         headers = {b'Content-Type': [b'application/json']}
         data = {'name': upload_file.filename, 'filename': upload_file.filename}
-        return treq.post(url, data=data, files=files, headers=headers).addCallback(check).addErrback(fail)
+        auth = (self._env.security_user_name, self._env.security_user_password)
+        return treq.post(url, auth=auth, data=data, files=files, headers=headers).addCallback(check).addErrback(fail)

@@ -43,6 +43,7 @@ def validate_jwt(scope, request, on_error=None):
         return authorization_required_wrapper
     return authorization_required_decorator
 
+
 def jwt_session(request):
     """
     Validate an incoming session and only proceed with a decoded session if the session is valid,
@@ -75,22 +76,3 @@ def _bind_request_detail_to_log(request):
         method=request.method,
         path=request.full_path
     )
-
-
-def before_request(request):
-    """
-    Sets up request data before a transaction.
-    :param request: The request object passed in
-    :return: the original_function call
-    """
-
-    def before_request_decorator(original_function):
-        @wraps(original_function)
-        def before_request_wrapper(*args, **kwargs):
-            #if ons_env.logger.is_json:
-            #    _bind_request_detail_to_log(request)
-            return original_function(*args, **kwargs)
-
-        return before_request_wrapper
-
-    return before_request_decorator

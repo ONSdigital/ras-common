@@ -42,6 +42,7 @@ class ONSCloudFoundry(object):
     def protocol(self):
         return self._protocol
 
+
 def my_match(target, pattern):
     """
     This is a customised version of "match" that also handles matching based

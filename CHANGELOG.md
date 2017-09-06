@@ -1,3 +1,8 @@
+0.4.0
+-----
+
+- Removing default value for ONS_CRYPTOKEY to ensure it doesn't silently fall back to an open value
+
 0.3.0 (unreleased)
 ------------------
 

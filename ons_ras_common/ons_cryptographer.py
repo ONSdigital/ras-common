@@ -29,7 +29,7 @@ class ONSCryptographer:
         """
         Setup the required keys with values from config.ini
         """
-        key = getenv('ONS_CRYPTOKEY', self._env.get('crypto_key', 'NO_KEY'))
+        key = getenv('ONS_CRYPTOKEY')
         self._env.logger.info('Setting crypto key to "{}"'.format(key))
         self._key = sha256(key.encode('utf-8')).digest()
 

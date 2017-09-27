@@ -1,4 +1,6 @@
 import unittest
+from unittest.mock import patch
+
 from ons_ras_common import ons_env
 from os import environ
 
@@ -6,9 +8,6 @@ ons_env.setup()
 
 
 class TestEnvironment(unittest.TestCase):
-
-    def setUp(self):
-        pass
 
     def test_default_settings_exist(self):
         enable_database = ons_env.get('enable_database', boolean=True)
@@ -33,6 +32,12 @@ class TestEnvironment(unittest.TestCase):
         environ['MY_ENV_KEY'] = 'HELLO'
         test = ons_env.get('MY_ENV_KEY')
         self.assertEqual(test, 'HELLO')
+
+    def test_environment_override_always_active(self):
+        environ['API_PORT'] = '5555'
+        a1 = ons_env.get('api_port')
+        a2 = ons_env.get('api_port', section='nonexistent')
+        self.assertEqual(a1, a2)
 
     def test_host_attribute(self):
         self.assertEqual(ons_env.host, 'localhost')

@@ -140,15 +140,13 @@ class ONSEnvironment(object):
         :param section: An optional section name, otherwise we use the environment
         :return: The value of the attribute or 'default' if not found
         """
+        value = getenv(attribute.upper(), default=None)
+        if value:
+            return value.lower() in ['yes', 'true'] if boolean else value
+
         section = section or self._env
         if section not in self._config:
             return default
-
-        value = getenv(attribute.upper(), default=None)
-        if value:
-            if not boolean:
-                return value
-            return value.lower() in ['yes', 'true']
 
         base = self._config[section]
         return base.getboolean(attribute, default) if boolean else base.get(attribute, default)

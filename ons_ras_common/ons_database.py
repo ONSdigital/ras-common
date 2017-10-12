@@ -47,7 +47,7 @@ class ONSDatabase(object):
         if self._env.cf.detected:
             self._connection = self._env.cf.url
         else:
-            self._connection = self._env.get('db_connection')
+            self._connection = os.getenv('db_connection', self._env.get('db_connection'))
 
         #if not len(self._env.cf.databases):
         #    if not self._env.get('db_connection'):

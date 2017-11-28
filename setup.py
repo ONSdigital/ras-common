@@ -3,7 +3,7 @@
 import ast
 from os import path
 
-from setuptools import setup
+from setuptools import find_packages, setup
 
 try:
     # For setup.py install
@@ -38,7 +38,9 @@ setup(
         'Programming Language :: Python :: 3.6'
     ],
     keywords=['micro-service', 'ons-ras'],
-    packages=["ons_ras_common"],
+    packages=[
+        find_packages()
+    ],
     install_requires=install_requirements,
     package_data={
         "ras-common": [

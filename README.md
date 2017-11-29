@@ -1,3 +1,13 @@
+..  Titling
+    ##++::==~~--''``
+
+::
+
+    **DEPRECATED** Please note that this repository is no longer used and will likely be removed at some point in the future. The information in this readme may be out of date or possibly misleading and should not be relied upon.
+
+
+
+
 # ras-common
 [![Build Status](https://travis-ci.org/ONSdigital/ras-common.svg?branch=twine)](https://travis-ci.org/ONSdigital/ras-common)
 [![codecov](https://codecov.io/gh/ONSdigital/ras-common/branch/twine/graph/badge.svg)](https://codecov.io/gh/ONSdigital/ras-common)
